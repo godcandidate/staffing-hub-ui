@@ -22,11 +22,11 @@
 
 .login-container {
   width: 100%;
-  max-width: 480px;
+  max-width: 520px;
   background: white;
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-xl);
-  padding: var(--spacing-2xl);
+  padding: 2rem;
   position: relative;
   z-index: 1;
   border: 1px solid var(--neutral-200);
@@ -34,7 +34,7 @@
 
 .login-header {
   text-align: center;
-  margin-bottom: var(--spacing-2xl);
+  margin-bottom: 1.5rem;
 }
 
 .login-header h1 {
@@ -51,7 +51,7 @@
 }
 
 .role-selection {
-  margin-bottom: var(--spacing-2xl);
+  margin-bottom: 1.5rem;
 }
 
 .role-selection h2 {
@@ -93,6 +93,11 @@
   box-shadow: var(--shadow-lg);
 }
 
+.role-card.selected h3,
+.role-card.selected p {
+  color: white;
+}
+
 .role-card svg {
   margin-bottom: var(--spacing-md);
   color: var(--primary-600);
@@ -116,7 +121,7 @@
 }
 
 .login-form {
-  margin-bottom: var(--spacing-2xl);
+  margin-bottom: 1.5rem;
   animation: fadeIn 0.3s ease-in;
 }
 
@@ -178,7 +183,7 @@
 
 .demo-credentials {
   border-top: 1px solid var(--neutral-200);
-  padding-top: var(--spacing-xl);
+  padding-top: 1rem;
 }
 
 .demo-credentials h3 {
