@@ -22,6 +22,7 @@ const Layout = ({ children, userType, setIsAuthenticated }) => {
   const stafferNav = [
     { path: '/staffer/jobs', icon: Briefcase, label: 'Job Management' },
     { path: '/staffer/post-job', icon: Plus, label: 'Post Job' },
+    { path: '/staffer/talent-matching', icon: Users, label: 'Talent Matching' },
     { path: '/staffer/analytics', icon: BarChart3, label: 'Analytics' }
   ]
 

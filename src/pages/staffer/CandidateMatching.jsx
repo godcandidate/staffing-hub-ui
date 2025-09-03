@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { X, Send, Star } from 'lucide-react'
+import { X, Send, Star, Eye } from 'lucide-react'
 
 const CandidateMatching = () => {
   const { jobId } = useParams()
   const [selectedCandidates, setSelectedCandidates] = useState([])
+  const [showEmployeeModal, setShowEmployeeModal] = useState(null)
 
   const job = {
     title: "Senior Data Analyst",
@@ -109,56 +110,44 @@ const CandidateMatching = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* AI Recommendations */}
-        <div className="recommendations-section">
-          <h2 className="mb-4">AI Recommendations</h2>
+        <div className="recommendations-section card">
+          <div className="list-header">
+            <h2 className="font-semibold">AI Recommendations ({aiRecommendations.length})</h2>
+          </div>
           
-          <div className="candidates-list">
+          <div className="candidate-list-items">
             {aiRecommendations.map((candidate) => (
-              <div key={candidate.id} className="candidate-card card mb-4">
-                <div className="candidate-header">
-                  <div className="flex items-start gap-3">
-                    <input
-                      type="checkbox"
-                      checked={selectedCandidates.includes(candidate.id)}
-                      onChange={() => toggleCandidateSelection(candidate.id)}
-                      className="candidate-checkbox"
-                    />
-                    <div className="candidate-avatar">
-                      {candidate.avatar}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <h3 className="font-semibold">{candidate.name}</h3>
-                        <button
-                          onClick={() => removeRecommendation(candidate.id)}
-                          className="remove-btn"
-                          title="Remove from recommendations"
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
-                      <p className="text-sm text-gray mb-2">
-                        {candidate.role} • {candidate.department}
-                      </p>
-                      <div className="match-info mb-3">
-                        <span className="match-percent">
-                          <Star size={16} className="text-accent-amber" />
-                          {candidate.matchPercent}% match
-                        </span>
-                        <span className="text-sm text-gray">
-                          {candidate.experience} experience
-                        </span>
-                      </div>
-                    </div>
+              <div key={candidate.id} className="candidate-list-item">
+                <div className="flex items-center gap-4">
+                  <input
+                    type="checkbox"
+                    checked={selectedCandidates.includes(candidate.id)}
+                    onChange={() => toggleCandidateSelection(candidate.id)}
+                    className="candidate-checkbox"
+                  />
+                  <div className="candidate-name">
+                    <span className="font-medium">{candidate.name}</span>
+                    <span className="badge badge-recommended ml-2">
+                      {candidate.matchPercent}%
+                    </span>
                   </div>
                 </div>
-
-                <div className="candidate-skills">
-                  {candidate.skills.map((skill) => (
-                    <span key={skill} className="skill-chip">
-                      {skill}
-                    </span>
-                  ))}
+                
+                <div className="flex items-center gap-2">
+                  <button
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => setShowEmployeeModal(candidate)}
+                  >
+                    <Eye size={16} />
+                    View
+                  </button>
+                  <button
+                    onClick={() => removeRecommendation(candidate.id)}
+                    className="btn btn-ghost btn-sm text-error"
+                  >
+                    <X size={16} />
+                    Remove
+                  </button>
                 </div>
               </div>
             ))}
@@ -166,36 +155,37 @@ const CandidateMatching = () => {
         </div>
 
         {/* Applicants */}
-        <div className="applicants-section">
-          <h2 className="mb-4">Direct Applicants</h2>
+        <div className="applicants-section card">
+          <div className="list-header">
+            <h2 className="font-semibold">Direct Applicants ({applicants.length})</h2>
+          </div>
           
-          <div className="applicants-list">
+          <div className="applicant-list-items">
             {applicants.map((applicant) => (
-              <div key={applicant.id} className="applicant-card card mb-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="candidate-avatar">
-                      {applicant.avatar}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">{applicant.name}</h3>
-                      <p className="text-sm text-gray">
-                        {applicant.role} • {applicant.department}
-                      </p>
-                      <p className="text-xs text-gray">
-                        Applied {applicant.appliedDate}
-                      </p>
-                    </div>
+              <div key={applicant.id} className="applicant-list-item">
+                <div className="flex items-center gap-4">
+                  <div className="applicant-name">
+                    <span className="font-medium">{applicant.name}</span>
+                    <span className="text-xs text-neutral-400 block">
+                      Applied {applicant.appliedDate}
+                    </span>
                   </div>
-                  
-                  <div className="applicant-actions">
-                    <button className="btn btn-success btn-sm">
-                      Accept
-                    </button>
-                    <button className="btn btn-danger btn-sm">
-                      Reject
-                    </button>
-                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <button 
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => setShowEmployeeModal(applicant)}
+                  >
+                    <Eye size={16} />
+                    View
+                  </button>
+                  <button className="btn btn-success btn-sm">
+                    Accept
+                  </button>
+                  <button className="btn btn-danger btn-sm">
+                    Reject
+                  </button>
                 </div>
               </div>
             ))}
@@ -203,12 +193,72 @@ const CandidateMatching = () => {
             {applicants.length === 0 && (
               <div className="empty-state text-center p-6">
                 <div className="text-4xl mb-2">📝</div>
-                <p className="text-gray">No direct applications yet</p>
+                <p className="text-neutral-500">No direct applications yet</p>
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* Employee Details Modal */}
+      {showEmployeeModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal-header">
+              <h3>Employee Details</h3>
+              <button onClick={() => setShowEmployeeModal(null)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-content">
+              <div className="employee-profile">
+                <div className="profile-header mb-4">
+                  <div className="employee-avatar-large">
+                    {showEmployeeModal.name.split(' ').map(n => n[0]).join('')}
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">{showEmployeeModal.name}</h4>
+                    <p className="text-neutral-500">{showEmployeeModal.role}</p>
+                    <p className="text-sm text-neutral-400">{showEmployeeModal.department}</p>
+                  </div>
+                </div>
+                <div className="profile-details">
+                  {showEmployeeModal.experience && (
+                    <div className="detail-section mb-4">
+                      <h5 className="font-medium mb-2">Experience</h5>
+                      <p>{showEmployeeModal.experience}</p>
+                    </div>
+                  )}
+                  {showEmployeeModal.skills && (
+                    <div className="detail-section mb-4">
+                      <h5 className="font-medium mb-2">Skills</h5>
+                      <div className="skills-grid">
+                        {showEmployeeModal.skills.map((skill) => (
+                          <span key={skill} className="skill-chip">{skill}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {showEmployeeModal.matchPercent && (
+                    <div className="detail-section">
+                      <h5 className="font-medium mb-2">Match Score</h5>
+                      <span className="text-success font-semibold text-lg">{showEmployeeModal.matchPercent}%</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button 
+                className="btn btn-primary"
+                onClick={() => setShowEmployeeModal(null)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

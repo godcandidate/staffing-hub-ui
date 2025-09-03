@@ -9,6 +9,7 @@ import MyApplications from './pages/employee/MyApplications'
 import ProfileView from './pages/employee/ProfileView'
 import PostJob from './pages/staffer/PostJob'
 import JobManagement from './pages/staffer/JobManagement'
+import TalentMatching from './pages/staffer/TalentMatching'
 import CandidateMatching from './pages/staffer/CandidateMatching'
 import ApplicantReview from './pages/staffer/ApplicantReview'
 import Analytics from './pages/staffer/Analytics'
@@ -56,6 +57,7 @@ function App() {
             {/* Staffer Routes */}
             <Route path="/staffer/post-job" element={<PostJob />} />
             <Route path="/staffer/jobs" element={<JobManagement />} />
+            <Route path="/staffer/talent-matching" element={<TalentMatching />} />
             <Route path="/staffer/matching/:jobId" element={<CandidateMatching />} />
             <Route path="/staffer/applicants/:jobId" element={<ApplicantReview />} />
             <Route path="/staffer/analytics" element={<Analytics />} />
