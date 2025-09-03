@@ -1,0 +1,320 @@
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--neutral-50);
+}
+
+.sidebar {
+  width: 280px;
+  background: white;
+  border-right: 1px solid var(--neutral-200);
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-sm);
+  transition: width 0.3s ease;
+}
+
+.sidebar.collapsed {
+  width: 80px;
+}
+
+.sidebar-header {
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--neutral-100);
+  background: linear-gradient(135deg, var(--primary-50), white);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.collapse-btn {
+  padding: 0.5rem;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  color: var(--primary-600);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.collapse-btn:hover {
+  background: var(--primary-100);
+}
+
+.sidebar-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.sidebar-header h2 {
+  color: var(--primary-700);
+  margin-bottom: var(--spacing-sm);
+  font-size: 1.375rem;
+  font-weight: 700;
+}
+
+.user-portal-title {
+  color: var(--neutral-500);
+  font-size: 0.875rem;
+  margin: 0;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: var(--spacing-lg) 0;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: 0.875rem var(--spacing-lg);
+  color: var(--neutral-600);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  font-size: 0.875rem;
+  margin: 0 var(--spacing-md);
+  border-radius: var(--radius-md);
+  position: relative;
+  justify-content: flex-start;
+}
+
+.sidebar.collapsed .nav-item {
+  justify-content: center;
+  padding: 0.875rem;
+}
+
+.sidebar.collapsed .nav-item span {
+  display: none;
+}
+
+.nav-item:hover {
+  background: var(--neutral-100);
+  color: var(--neutral-700);
+  transform: translateX(4px);
+}
+
+.nav-item.active {
+  background: var(--primary-600);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.top-bar {
+  background: white;
+  border-bottom: 1px solid var(--neutral-200);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-xs);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  background: var(--neutral-50);
+  padding: 0.75rem var(--spacing-md);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--neutral-200);
+  min-width: 400px;
+  transition: all 0.2s ease;
+}
+
+.search-bar:focus-within {
+  border-color: var(--primary-300);
+  box-shadow: 0 0 0 3px var(--primary-100);
+  background: white;
+}
+
+.search-bar svg {
+  color: var(--neutral-400);
+}
+
+.search-bar input {
+  border: none;
+  background: transparent;
+  outline: none;
+  flex: 1;
+  font-size: 0.875rem;
+  color: var(--neutral-700);
+}
+
+.search-bar input::placeholder {
+  color: var(--neutral-400);
+}
+
+.top-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.icon-btn {
+  padding: 0.625rem;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  color: var(--neutral-500);
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.icon-btn:hover {
+  background: var(--neutral-100);
+  color: var(--neutral-700);
+  transform: translateY(-1px);
+}
+
+.talk-to-ruth-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 0.625rem var(--spacing-md);
+  background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.talk-to-ruth-btn:hover {
+  background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  background: var(--primary-100);
+  color: var(--primary-600);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--primary-200);
+  transition: all 0.2s ease;
+}
+
+.user-avatar:hover {
+  background: var(--primary-200);
+  transform: scale(1.05);
+}
+
+.logout-btn {
+  padding: 0.5rem var(--spacing-md);
+  background: transparent;
+  border: 1px solid var(--neutral-300);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--neutral-600);
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.logout-btn:hover {
+  background: var(--error);
+  color: white;
+  border-color: var(--error);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.page-content {
+  flex: 1;
+  padding: var(--spacing-xl);
+  overflow-y: auto;
+  background: var(--neutral-50);
+}
+
+/* Page Header Styles */
+.page-header {
+  margin-bottom: var(--spacing-xl);
+}
+
+.page-header h1 {
+  color: var(--neutral-900);
+  margin-bottom: var(--spacing-sm);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.page-header p {
+  color: var(--neutral-500);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 240px;
+  }
+  
+  .search-bar {
+    min-width: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--neutral-200);
+  }
+  
+  .sidebar-nav {
+    display: flex;
+    overflow-x: auto;
+    padding: var(--spacing-md);
+  }
+  
+  .nav-item {
+    white-space: nowrap;
+    margin: 0 var(--spacing-sm);
+  }
+  
+  .search-bar {
+    min-width: 200px;
+  }
+  
+  .page-content {
+    padding: var(--spacing-md);
+  }
+}
