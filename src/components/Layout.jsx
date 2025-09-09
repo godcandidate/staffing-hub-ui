@@ -71,16 +71,6 @@ const Layout = ({ children, userType, setIsAuthenticated }) => {
           </div>
           
           <div className="top-bar-actions">
-            <button className="icon-btn">
-              <Bell size={20} />
-            </button>
-            <button 
-              className="talk-to-ruth-btn"
-              onClick={() => setShowChat(true)}
-            >
-              <MessageCircle size={16} />
-              Talk to Ruth
-            </button>
             <div className="user-menu">
               <div className="user-avatar">
                 <User size={20} />

@@ -88,20 +88,20 @@ What You'll Gain:
               <h3 className="mb-4">Job Details</h3>
               
               <div className="form-group mb-4">
-                <label className="form-label">Job Title *</label>
+                <label className="form-label">Company Name *</label>
                 <input
                   type="text"
                   className="form-input"
                   value={formData.title}
                   onChange={(e) => handleInputChange('title', e.target.value)}
-                  placeholder="e.g. Senior Frontend Developer"
+                  placeholder="e.g. Microsoft, Amazon, Google"
                   required
                 />
               </div>
 
               <div className="form-group mb-4">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="form-label">Job Description *</label>
+                  <label className="form-label">Company Description *</label>
                   <button
                     type="button"
                     className="ai-enhance"
@@ -116,7 +116,7 @@ What You'll Gain:
                   rows={8}
                   value={formData.description}
                   onChange={(e) => handleInputChange('description', e.target.value)}
-                  placeholder="Describe the role, responsibilities, and what the candidate will work on..."
+                  placeholder="Describe the company, project overview, and what the engagement involves..."
                   required
                 />
               </div>
@@ -194,7 +194,7 @@ What You'll Gain:
               ))}
             </div>
 
-            <div className="card">
+            <div className="card mb-6">
               <h3 className="mb-4">Team Contact</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -222,6 +222,46 @@ What You'll Gain:
                   />
                 </div>
               </div>
+            </div>
+
+            <div className="card">
+              <h3 className="mb-4">Attach Files</h3>
+              
+              <div className="upload-area mb-4">
+                <Upload size={24} className="text-neutral-400 mb-2" />
+                <p className="text-sm text-neutral-500 mb-2">Drag & drop files here or click to browse</p>
+                <input
+                  type="file"
+                  multiple
+                  className="hidden"
+                  id="file-upload"
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files)
+                    setAttachments(prev => [...prev, ...files])
+                  }}
+                />
+                <label htmlFor="file-upload" className="btn btn-secondary btn-sm cursor-pointer">
+                  Choose Files
+                </label>
+              </div>
+
+              {attachments.length > 0 && (
+                <div className="attachments-list">
+                  <p className="text-sm font-medium mb-3">Attached Files ({attachments.length})</p>
+                  {attachments.map((file, index) => (
+                    <div key={index} className="attachment-item flex items-center justify-between p-3 bg-neutral-50 rounded-md mb-2">
+                      <span className="text-sm">{file.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => setAttachments(prev => prev.filter((_, i) => i !== index))}
+                        className="text-error hover:bg-error hover:text-white p-1 rounded"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             
             <div className="form-actions mt-6">
