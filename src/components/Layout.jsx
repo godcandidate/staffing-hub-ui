@@ -14,7 +14,7 @@ const Layout = ({ children, userType, setIsAuthenticated }) => {
 
   const employeeNav = [
     { path: '/employee/dashboard', icon: Home, label: 'Dashboard' },
-    { path: '/employee/jobs', icon: Briefcase, label: 'Jobs' },
+    { path: '/employee/jobs', icon: Briefcase, label: 'Recommended Jobs' },
     { path: '/employee/applications', icon: FileText, label: 'Applications' },
     { path: '/employee/profile', icon: User, label: 'Profile' }
   ]
@@ -42,7 +42,7 @@ const Layout = ({ children, userType, setIsAuthenticated }) => {
           </button>
           {!sidebarCollapsed && (
             <div className="sidebar-title">
-              <h2>AI Staffing Hub</h2>
+              <h2>SmartStaff</h2>
               <p className="user-portal-title">{userTitle}</p>
             </div>
           )}
@@ -65,11 +65,7 @@ const Layout = ({ children, userType, setIsAuthenticated }) => {
 
       <div className="main-content">
         <header className="top-bar">
-          <div className="search-bar">
-            <Search size={20} />
-            <input type="text" placeholder="Search jobs, people, skills..." />
-          </div>
-          
+          <div></div>
           <div className="top-bar-actions">
             <div className="user-menu">
               <div className="user-avatar">
@@ -94,7 +90,7 @@ const Layout = ({ children, userType, setIsAuthenticated }) => {
       <RuthChat isOpen={showChat} onClose={() => setShowChat(false)} />
     </div>
     
-    {!showChat && (
+    {!showChat && userType === 'employee' && (
       <button 
         className="ruth-chat"
         onClick={() => setShowChat(true)}

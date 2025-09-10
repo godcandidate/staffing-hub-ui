@@ -12,10 +12,19 @@
   flex-direction: column;
   box-shadow: var(--shadow-sm);
   transition: width 0.3s ease;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 100;
 }
 
 .sidebar.collapsed {
   width: 80px;
+}
+
+.sidebar.collapsed + .main-content {
+  margin-left: 80px;
 }
 
 .sidebar-header {
@@ -112,6 +121,7 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  margin-left: 280px;
 }
 
 .top-bar {
