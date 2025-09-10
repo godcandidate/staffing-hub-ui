@@ -65,11 +65,7 @@ const Layout = ({ children, userType, setIsAuthenticated }) => {
 
       <div className="main-content">
         <header className="top-bar">
-          <div className="search-bar">
-            <Search size={20} />
-            <input type="text" placeholder="Search jobs, people, skills..." />
-          </div>
-          
+          <div></div>
           <div className="top-bar-actions">
             <div className="user-menu">
               <div className="user-avatar">
@@ -94,7 +90,7 @@ const Layout = ({ children, userType, setIsAuthenticated }) => {
       <RuthChat isOpen={showChat} onClose={() => setShowChat(false)} />
     </div>
     
-    {!showChat && (
+    {!showChat && userType === 'employee' && (
       <button 
         className="ruth-chat"
         onClick={() => setShowChat(true)}
