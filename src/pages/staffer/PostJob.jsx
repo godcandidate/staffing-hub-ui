@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Sparkles, Upload, X } from 'lucide-react'
+import { Sparkles, Upload, X, List } from 'lucide-react'
 
 const PostJob = () => {
   const [formData, setFormData] = useState({
@@ -43,6 +43,18 @@ const PostJob = () => {
     const newRoles = [...formData.roles]
     newRoles[roleIndex].requirements = requirements
     setFormData(prev => ({ ...prev, roles: newRoles }))
+  }
+
+  const formatToBullets = (roleIndex) => {
+    const role = formData.roles[roleIndex]
+    if (!role.requirements) return
+    
+    const lines = role.requirements.split('\n').filter(line => line.trim())
+    const bulletPoints = lines.map(line => {
+      const trimmed = line.trim()
+      return trimmed.startsWith('•') ? trimmed : `• ${trimmed}`
+    }).join('\n')
+    updateRoleRequirements(roleIndex, bulletPoints)
   }
 
   const enhanceWithAI = () => {
@@ -171,13 +183,23 @@ What You'll Gain:
                   </div>
                   
                   <div className="form-group">
-                    <label className="form-label">Role Requirements</label>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="form-label">Role Requirements</label>
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={() => formatToBullets(roleIndex)}
+                      >
+                        <List size={16} />
+                        Bullet List
+                      </button>
+                    </div>
                     <textarea
                       className="form-textarea"
                       rows={4}
                       value={role.requirements}
                       onChange={(e) => updateRoleRequirements(roleIndex, e.target.value)}
-                      placeholder="Describe the specific requirements, skills, and qualifications for this role..."
+                      placeholder="Enter each requirement on a new line:\n\n3+ years Python experience\nStrong knowledge of Django framework\nExperience with REST APIs"
                     />
                   </div>
                 </div>
@@ -291,7 +313,7 @@ What You'll Gain:
                       <h3 className="font-semibold text-lg mb-3 text-primary-700">
                         {role.name || `Role ${index + 1}`}
                       </h3>
-                      <div className="requirements-text">
+                      <div className="requirements-text text-left">
                         {role.requirements.split('\n').map((line, i) => (
                           <p key={i} className="mb-2">{line}</p>
                         ))}
@@ -321,7 +343,7 @@ What You'll Gain:
                 </div>
               </div>
 
-              <div className="card">
+              <div className="card mb-6">
                 <h3 className="font-semibold mb-4">Contact Information</h3>
                 <div className="contact-card">
                   <div className="contact-avatar">
@@ -333,8 +355,27 @@ What You'll Gain:
                   </div>
                 </div>
               </div>
+
+              {attachments.length > 0 && (
+                <div className="card">
+                  <h3 className="font-semibold mb-4">Attached Files</h3>
+                  <div className="attached-files-list">
+                    {attachments.map((file, index) => (
+                      <div key={index} className="attached-file-item flex items-center gap-3 p-3 bg-neutral-50 rounded-md mb-2">
+                        <Upload size={16} className="text-neutral-400" />
+                        <div className="flex-1">
+                          <span className="text-sm font-medium block">{file.name}</span>
+                          <span className="text-xs text-neutral-400">({(file.size / 1024).toFixed(1)} KB)</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
+
+
 
           <div className="preview-actions mt-8 flex justify-center gap-4">
             <button 
