@@ -1119,11 +1119,15 @@
 
 .table-row {
   display: grid;
-  grid-template-columns: 2fr 1.5fr 1fr 1.5fr;
+  grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr 2fr;
   gap: 1rem;
   padding: 1rem 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--neutral-100);
   align-items: center;
+}
+
+.jobs-table .table-row {
+  grid-template-columns: 0.3fr 2fr 1.5fr 1fr 1fr 1fr 2fr;
 }
 
 .table-header .table-row {

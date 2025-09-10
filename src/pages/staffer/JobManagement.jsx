@@ -106,83 +106,70 @@ const JobManagement = () => {
         </div>
       </div>
 
-      {/* Jobs List */}
-      <div className="jobs-list">
-        {filteredJobs.map((job) => (
-          <div key={job.id} className="card mb-4">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <h3 className="font-semibold">{job.title}</h3>
-                  <span className={`badge ${getStatusBadge(job)}`}>
-                    {getStatusText(job)}
-                  </span>
-                </div>
-                
-                <p className="text-gray mb-3">{job.team}</p>
-                
-                <div className="flex items-center gap-6 text-sm text-gray">
-                  <span>
-                    Roles: {job.rolesFilled}/{job.rolesTotal} filled
-                  </span>
-                  <span>
-                    Applications: {job.applications}
-                  </span>
-                  <span>
-                    Posted: {job.postedDate}
-                  </span>
-                </div>
+      {/* Jobs Table */}
+      <div className="jobs-table card">
+        <div className="table-header">
+          <div className="table-row font-semibold text-neutral-600 border-b border-neutral-200 pb-3">
+            <div>#</div>
+            <div>Job Title</div>
+            <div>Team</div>
+            <div>Status</div>
+            <div>Applications</div>
+            <div>Posted</div>
+            <div>Actions</div>
+          </div>
+        </div>
+        
+        <div className="table-body">
+          {filteredJobs.map((job, index) => (
+            <div key={job.id} className="table-row py-4 border-b border-neutral-100 hover:bg-neutral-50 transition-colors">
+              <div>
+                <span className="text-neutral-400 font-mono text-sm">{index + 1}</span>
               </div>
-
+              <div>
+                <span className="font-semibold text-neutral-900 text-sm">{job.title}</span>
+              </div>
+              <div>
+                <span className="text-neutral-600">{job.team}</span>
+              </div>
+              <div>
+                <span className={`badge ${getStatusBadge(job)}`}>
+                  {getStatusText(job)}
+                </span>
+              </div>
+              <div>
+                <span className="font-medium">{job.applications}</span>
+              </div>
+              <div>
+                <span className="text-neutral-500 text-sm">{job.postedDate}</span>
+              </div>
               <div className="flex items-center gap-2">
                 {job.status === 'active' && (
                   <>
                     <Link
                       to={`/staffer/matching/${job.id}`}
-                      className="btn btn-secondary btn-sm"
+                      className="btn btn-ghost btn-sm"
                     >
-                      View Matches
+                      Matches
                     </Link>
                     <Link
                       to={`/staffer/applicants/${job.id}`}
                       className="btn btn-primary btn-sm"
                     >
-                      Review ({job.applications})
+                      Review
                     </Link>
                   </>
                 )}
-                
-                <div className="job-actions">
-                  <button className="icon-btn" title="Edit">
-                    <Edit size={16} />
-                  </button>
-                  <button className="icon-btn" title="Mark Unavailable">
-                    <EyeOff size={16} />
-                  </button>
-                  <button className="icon-btn text-accent-coral" title="Delete">
-                    <Trash2 size={16} />
-                  </button>
-                </div>
+                <button className="icon-btn" title="Edit">
+                  <Edit size={16} />
+                </button>
+                <button className="icon-btn text-error" title="Delete">
+                  <Trash2 size={16} />
+                </button>
               </div>
             </div>
-
-            {/* Progress Bar */}
-            {job.status === 'active' && (
-              <div className="progress-section mt-4">
-                <div className="flex justify-between text-sm mb-2">
-                  <span>Filling Progress</span>
-                  <span>{Math.round((job.rolesFilled / job.rolesTotal) * 100)}%</span>
-                </div>
-                <div className="progress-bar">
-                  <div 
-                    className="progress-fill"
-                    style={{ width: `${(job.rolesFilled / job.rolesTotal) * 100}%` }}
-                  ></div>
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       {filteredJobs.length === 0 && (
