@@ -14,7 +14,7 @@ const Layout = ({ children, userType, setIsAuthenticated }) => {
 
   const employeeNav = [
     { path: '/employee/dashboard', icon: Home, label: 'Dashboard' },
-    { path: '/employee/jobs', icon: Briefcase, label: 'Jobs' },
+    { path: '/employee/jobs', icon: Briefcase, label: 'Recommended Jobs' },
     { path: '/employee/applications', icon: FileText, label: 'Applications' },
     { path: '/employee/profile', icon: User, label: 'Profile' }
   ]
@@ -42,7 +42,7 @@ const Layout = ({ children, userType, setIsAuthenticated }) => {
           </button>
           {!sidebarCollapsed && (
             <div className="sidebar-title">
-              <h2>AI Staffing Hub</h2>
+              <h2>SmartStaff</h2>
               <p className="user-portal-title">{userTitle}</p>
             </div>
           )}
