@@ -67,14 +67,14 @@ const JobsBoard = () => {
     const matchesSkill = !selectedSkill || job.skills.includes(selectedSkill)
     const matchesDuration = !selectedDuration || job.duration === selectedDuration
     
-    return matchesSearch && matchesSkill && matchesDuration
+    return job.isRecommended && matchesSearch && matchesSkill && matchesDuration
   })
 
   return (
     <div className="jobs-board">
       <div className="page-header mb-6">
-        <h1>Available Opportunities</h1>
-        <p className="text-gray">Discover roles that match your skills and interests</p>
+        <h1>Recommended Jobs</h1>
+        <p className="text-gray">AI-curated opportunities that match your skills and interests</p>
       </div>
 
       {/* Filters */}

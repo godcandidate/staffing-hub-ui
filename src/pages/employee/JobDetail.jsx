@@ -15,11 +15,12 @@ const JobDetail = () => {
     rolesAvailable: 2,
     startDate: "January 15, 2024",
     matchPercent: 92,
-    description: `We're looking for a Senior Data Analyst to join our Analytics Team and help drive data-driven decision making across the organization. 
+    companyName: "Microsoft",
+    companyDescription: `Microsoft is a leading technology company that develops, manufactures, licenses, supports, and sells computer software, consumer electronics, personal computers, and related services.
 
-You'll work closely with product managers, engineers, and business stakeholders to analyze user behavior, identify growth opportunities, and create actionable insights through compelling data visualizations.
+We are committed to empowering every person and organization on the planet to achieve more. Our mission is to enable digital transformation for the era of an intelligent cloud and an intelligent edge.
 
-This role offers an excellent opportunity to work with cutting-edge analytics tools and make a direct impact on product strategy and business outcomes.`,
+Join our team and be part of creating technology that makes a difference in the world.`,
     responsibilities: [
       "Analyze large datasets to identify trends and patterns",
       "Create interactive dashboards and reports using Power BI",
@@ -97,16 +98,16 @@ This role offers an excellent opportunity to work with cutting-edge analytics to
         {/* Main Content */}
         <div className="lg:col-span-2">
           <div className="card mb-6">
-            <h2 className="mb-4">About This Role</h2>
+            <h2 className="mb-4">About {job.companyName}</h2>
             <div className="job-description">
-              {job.description.split('\n\n').map((paragraph, index) => (
+              {job.companyDescription.split('\n\n').map((paragraph, index) => (
                 <p key={index} className="mb-4">{paragraph}</p>
               ))}
             </div>
           </div>
 
           <div className="card mb-6">
-            <h2 className="mb-4">Key Responsibilities</h2>
+            <h2 className="mb-4">Role Requirements</h2>
             <ul className="responsibilities-list">
               {job.responsibilities.map((responsibility, index) => (
                 <li key={index} className="mb-2">
@@ -118,28 +119,13 @@ This role offers an excellent opportunity to work with cutting-edge analytics to
           </div>
 
           <div className="card">
-            <h2 className="mb-4">Skills & Requirements</h2>
-            
-            <div className="mb-4">
-              <h3 className="text-sm font-semibold text-gray mb-2">Required Skills</h3>
-              <div className="skills-grid">
-                {job.requiredSkills.map((skill) => (
-                  <span key={skill} className="skill-chip skill-required">
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-semibold text-gray mb-2">Preferred Skills</h3>
-              <div className="skills-grid">
-                {job.preferredSkills.map((skill) => (
-                  <span key={skill} className="skill-chip skill-preferred">
-                    {skill}
-                  </span>
-                ))}
-              </div>
+            <h2 className="mb-4">Required Skills</h2>
+            <div className="skills-grid">
+              {job.requiredSkills.map((skill) => (
+                <span key={skill} className="skill-chip skill-required">
+                  {skill}
+                </span>
+              ))}
             </div>
           </div>
         </div>
