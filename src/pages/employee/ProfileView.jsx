@@ -138,28 +138,7 @@ const ProfileView = () => {
             </div>
           </div>
 
-          {/* Recent Projects */}
-          <div className="card">
-            <h3 className="mb-4">Recent Projects</h3>
-            <div className="projects-list">
-              {profile.recentProjects.map((project, index) => (
-                <div key={index} className="project-item">
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-medium">{project.name}</h4>
-                    <span className="text-sm text-gray">{project.duration}</span>
-                  </div>
-                  <p className="text-sm text-gray mb-3">{project.role}</p>
-                  <div className="project-skills">
-                    {project.skills.map((skill) => (
-                      <span key={skill} className="skill-chip">
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+
         </div>
       </div>
     </div>
