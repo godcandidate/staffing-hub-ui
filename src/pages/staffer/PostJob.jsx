@@ -100,17 +100,7 @@ What You'll Gain:
               </div>
 
               <div className="form-group mb-4">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="form-label">Company Description *</label>
-                  <button
-                    type="button"
-                    className="ai-enhance"
-                    onClick={enhanceWithAI}
-                  >
-                    <Sparkles size={16} />
-                    AI Enhance
-                  </button>
-                </div>
+                <label className="form-label">Company Description *</label>
                 <textarea
                   className="form-textarea"
                   rows={8}
