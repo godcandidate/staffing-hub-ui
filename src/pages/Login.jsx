@@ -1,63 +1,63 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { User, Lock, Users, Briefcase } from 'lucide-react'
+import { User, Lock, Users, Briefcase, Mail } from 'lucide-react'
+import { authAPI } from '../api/auth'
 import './Login.css'
 
 const Login = ({ setUserType, setIsAuthenticated }) => {
   const [selectedRole, setSelectedRole] = useState('')
-  const [credentials, setCredentials] = useState({
-    email: '',
-    password: ''
-  })
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
   const navigate = useNavigate()
 
-  const mockUsers = {
-    employee: {
-      email: 'alex@company.com',
-      password: 'employee123',
-      name: 'Alex Thompson',
-      role: 'employee'
-    },
-    staffer: {
-      email: 'sarah@company.com',
-      password: 'staffer123',
-      name: 'Sarah Johnson',
-      role: 'staffer'
-    }
-  }
-
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault()
     
     if (!selectedRole) {
-      alert('Please select a role first')
+      setError('Please select a role first')
       return
     }
-
-    const user = mockUsers[selectedRole]
     
-    if (credentials.email === user.email && credentials.password === user.password) {
-      setUserType(selectedRole)
-      setIsAuthenticated(true)
-      
-      // Redirect to appropriate dashboard
-      if (selectedRole === 'employee') {
-        navigate('/employee/dashboard')
-      } else {
-        navigate('/staffer/jobs')
-      }
-    } else {
-      alert('Invalid credentials. Please check the demo credentials below.')
+    if (!email || !password) {
+      setError('Please enter both email and password')
+      return
     }
-  }
-
-  const quickLogin = (role) => {
-    const user = mockUsers[role]
-    setCredentials({
-      email: user.email,
-      password: user.password
-    })
-    setSelectedRole(role)
+    
+    setIsLoading(true)
+    setError('')
+    
+    try {
+      const data = await authAPI.login(email, password)
+      
+      if (data.success) {
+        const userType = data.data.user.userType
+        const expectedType = selectedRole === 'employee' ? 'EMPLOYEE' : 'STAFFER'
+        
+        if (userType !== expectedType) {
+          setError('Access denied. Please select the correct role.')
+          return
+        }
+        
+        // Store auth data
+        authAPI.storeAuthData(data.data.token, data.data.user)
+        
+        setUserType(selectedRole)
+        setIsAuthenticated(true)
+        
+        // Redirect to appropriate dashboard
+        if (selectedRole === 'employee') {
+          navigate('/employee/dashboard')
+        } else {
+          navigate('/staffer/jobs')
+        }
+      }
+    } catch (error) {
+      setError(error.message || 'Server error. Please try again later.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -93,17 +93,33 @@ const Login = ({ setUserType, setIsAuthenticated }) => {
 
         {selectedRole && (
           <form onSubmit={handleLogin} className="login-form">
+            {error && (
+              <div className="error-toast">
+                <div className="error-content">
+
+                  <span className="error-text">{error}</span>
+                  <button 
+                    className="error-close"
+                    onClick={() => setError('')}
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+            )}
+            
             <div className="form-group">
               <label className="form-label">Email</label>
               <div className="input-with-icon">
-                <User size={20} />
+                <Mail size={20} />
                 <input
                   type="email"
                   className="form-input"
-                  value={credentials.email}
-                  onChange={(e) => setCredentials(prev => ({ ...prev, email: e.target.value }))}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
                   required
+                  disabled={isLoading}
                 />
               </div>
             </div>
@@ -115,54 +131,26 @@ const Login = ({ setUserType, setIsAuthenticated }) => {
                 <input
                   type="password"
                   className="form-input"
-                  value={credentials.password}
-                  onChange={(e) => setCredentials(prev => ({ ...prev, password: e.target.value }))}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   required
+                  disabled={isLoading}
                 />
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary w-full">
-              Sign In as {selectedRole === 'employee' ? 'Employee' : 'Staffer'}
+            <button 
+              type="submit" 
+              className="btn btn-primary w-full"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Signing In...' : `Sign In as ${selectedRole === 'employee' ? 'Employee' : 'Staffer'}`}
             </button>
           </form>
         )}
 
-        <div className="demo-credentials">
-          <h3>Demo Credentials</h3>
-          <div className="demo-users">
-            <div className="demo-user">
-              <div className="demo-user-header">
-                <User size={20} />
-                <strong>Employee Demo</strong>
-              </div>
-              <p>Email: alex@company.com</p>
-              <p>Password: employee123</p>
-              <button 
-                className="btn btn-secondary btn-sm"
-                onClick={() => quickLogin('employee')}
-              >
-                Quick Login
-              </button>
-            </div>
-            
-            <div className="demo-user">
-              <div className="demo-user-header">
-                <Briefcase size={20} />
-                <strong>Staffer Demo</strong>
-              </div>
-              <p>Email: sarah@company.com</p>
-              <p>Password: staffer123</p>
-              <button 
-                className="btn btn-secondary btn-sm"
-                onClick={() => quickLogin('staffer')}
-              >
-                Quick Login
-              </button>
-            </div>
-          </div>
-        </div>
+
       </div>
     </div>
   )
