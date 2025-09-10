@@ -1130,6 +1130,10 @@
   grid-template-columns: 0.3fr 2fr 1.5fr 1fr 1fr 1fr 2fr;
 }
 
+.candidates-table .table-row {
+  grid-template-columns: 0.3fr 0.5fr 2fr 1.5fr 1fr 1fr 2fr;
+}
+
 .table-header .table-row {
   font-weight: 600;
   color: var(--neutral-light);
