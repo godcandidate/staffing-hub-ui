@@ -145,7 +145,7 @@ const Dashboard = () => {
             <p className="text-sm text-neutral-500 mt-1">Currently available positions you can apply for</p>
           </div>
           <Link to="/employee/jobs" className="btn btn-secondary">
-            View All Jobs
+            View Recommended Jobs
           </Link>
         </div>
 

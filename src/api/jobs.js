@@ -149,7 +149,6 @@ export const jobsAPI = {
 
     // Calculate statistics from available data
     const openJobs = jobs.data.filter(job => job.status === 'OPEN')
-    const user = authAPI.getStoredUser()
     
     // Calculate new matching roles based on user skills
     let newMatchingRoles = 0
