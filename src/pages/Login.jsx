@@ -64,7 +64,7 @@ const Login = ({ setUserType, setIsAuthenticated }) => {
     <div className="login-page">
       <div className="login-container">
         <div className="login-header">
-          <h1>AI Staffing Hub</h1>
+          <h1>SmartStaff</h1>
           <p>Connect talent with opportunities using intelligent matching</p>
         </div>
 
