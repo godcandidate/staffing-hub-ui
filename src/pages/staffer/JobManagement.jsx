@@ -1,57 +1,47 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { jobsAPI } from '../../api/jobs'
 
 const JobManagement = () => {
   const [activeTab, setActiveTab] = useState('active')
+  const [jobs, setJobs] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
 
-  const jobs = [
-    {
-      id: 1,
-      title: "Senior Data Analyst",
-      team: "Analytics Team",
-      rolesTotal: 2,
-      rolesFilled: 1,
-      status: "active",
-      postedDate: "Dec 15, 2023",
-      applications: 8
-    },
-    {
-      id: 2,
-      title: "Frontend Developer",
-      team: "Product Team",
-      rolesTotal: 3,
-      rolesFilled: 0,
-      status: "active",
-      postedDate: "Dec 20, 2023",
-      applications: 12
-    },
-    {
-      id: 3,
-      title: "DevOps Engineer",
-      team: "Infrastructure",
-      rolesTotal: 1,
-      rolesFilled: 1,
-      status: "filled",
-      postedDate: "Dec 10, 2023",
-      applications: 6
-    },
-    {
-      id: 4,
-      title: "UX Designer",
-      team: "Design Team",
-      rolesTotal: 2,
-      rolesFilled: 0,
-      status: "archived",
-      postedDate: "Nov 28, 2023",
-      applications: 4
+  useEffect(() => {
+    fetchJobs()
+  }, [])
+
+  const fetchJobs = async () => {
+    try {
+      setIsLoading(true)
+      setError('')
+      const response = await jobsAPI.getAllJobs()
+      // Map API data to component format
+      const mappedJobs = response.data.map(job => ({
+        id: job.id,
+        title: job.role,
+        team: job.client,
+        status: job.status === 'OPEN' ? 'active' : 'filled',
+        applications: 0, // Set to 0 as requested
+        postedDate: new Date(job.createdAt).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        })
+      }))
+      setJobs(mappedJobs)
+    } catch (error) {
+      setError(error.message || 'Failed to load jobs')
+    } finally {
+      setIsLoading(false)
     }
-  ]
+  }
 
   const filteredJobs = jobs.filter(job => {
     if (activeTab === 'active') return job.status === 'active'
     if (activeTab === 'filled') return job.status === 'filled'
-    if (activeTab === 'archived') return job.status === 'archived'
     return true
   })
 
@@ -97,22 +87,31 @@ const JobManagement = () => {
           >
             Filled ({jobs.filter(j => j.status === 'filled').length})
           </button>
-          <button
-            className={`tab ${activeTab === 'archived' ? 'active' : ''}`}
-            onClick={() => setActiveTab('archived')}
-          >
-            Archived ({jobs.filter(j => j.status === 'archived').length})
-          </button>
         </div>
       </div>
 
       {/* Jobs Table */}
-      <div className="jobs-table card">
+      {isLoading ? (
+        <div className="text-center py-8">
+          <div className="text-lg">Loading jobs...</div>
+        </div>
+      ) : error ? (
+        <div className="text-center py-8">
+          <div className="text-error">{error}</div>
+          <button 
+            className="btn btn-secondary mt-4"
+            onClick={fetchJobs}
+          >
+            Retry
+          </button>
+        </div>
+      ) : (
+        <div className="jobs-table card">
         <div className="table-header">
           <div className="table-row font-semibold text-neutral-600 border-b border-neutral-200 pb-3">
             <div>#</div>
             <div>Job Title</div>
-            <div>Team</div>
+            <div>Client</div>
             <div>Status</div>
             <div>Applications</div>
             <div>Posted</div>
@@ -171,15 +170,15 @@ const JobManagement = () => {
           ))}
         </div>
       </div>
+      )}
 
-      {filteredJobs.length === 0 && (
+      {!isLoading && !error && filteredJobs.length === 0 && (
         <div className="empty-state card text-center p-6">
           <div className="text-6xl mb-4">📋</div>
           <h3 className="mb-2">No jobs in this category</h3>
           <p className="text-gray mb-4">
             {activeTab === 'active' && "You don't have any active job postings."}
             {activeTab === 'filled' && "No jobs have been completed yet."}
-            {activeTab === 'archived' && "No archived jobs found."}
           </p>
           {activeTab === 'active' && (
             <Link to="/staffer/post-job" className="btn btn-primary">
