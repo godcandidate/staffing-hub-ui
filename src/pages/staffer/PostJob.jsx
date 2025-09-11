@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Sparkles, Upload, X, List } from 'lucide-react'
+import { jobsAPI } from '../../api/jobs'
 
 const PostJob = () => {
   const [formData, setFormData] = useState({
@@ -15,6 +16,9 @@ const PostJob = () => {
   const [skillInput, setSkillInput] = useState('')
   const [attachments, setAttachments] = useState([])
   const [currentStep, setCurrentStep] = useState(1)
+  const [isLoading, setIsLoading] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [error, setError] = useState('')
 
   const suggestedSkills = [
     'JavaScript', 'Python', 'React', 'Node.js', 'AWS', 'Docker', 
@@ -81,9 +85,33 @@ What You'll Gain:
     setCurrentStep(2)
   }
 
-  const handlePublish = () => {
-    console.log('Job posted:', formData)
-    alert('Job posted successfully!')
+  const handlePublish = async () => {
+    try {
+      setIsLoading(true)
+      setError('')
+      await jobsAPI.postJob(formData, attachments)
+      setShowSuccessModal(true)
+    } catch (error) {
+      setError(error.message || 'Failed to post job')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const resetForm = () => {
+    setCurrentStep(1)
+    setFormData({
+      title: '',
+      description: '',
+      roles: [{ name: '', requirements: '' }],
+      startDate: '',
+      duration: '',
+      rolesCount: 1,
+      teamContact: '',
+      contactEmail: ''
+    })
+    setAttachments([])
+    setShowSuccessModal(false)
   }
 
   return (
@@ -100,7 +128,7 @@ What You'll Gain:
               <h3 className="mb-4">Job Details</h3>
               
               <div className="form-group mb-4">
-                <label className="form-label">Company Name *</label>
+                <label className="form-label">Client Name *</label>
                 <input
                   type="text"
                   className="form-input"
@@ -112,13 +140,13 @@ What You'll Gain:
               </div>
 
               <div className="form-group mb-4">
-                <label className="form-label">Company Description *</label>
+                <label className="form-label">Client Description *</label>
                 <textarea
                   className="form-textarea"
                   rows={8}
                   value={formData.description}
                   onChange={(e) => handleInputChange('description', e.target.value)}
-                  placeholder="Describe the company, project overview, and what the engagement involves..."
+                  placeholder="Describe the client, project overview, and what the engagement involves..."
                   required
                 />
               </div>
@@ -199,7 +227,11 @@ What You'll Gain:
                       rows={4}
                       value={role.requirements}
                       onChange={(e) => updateRoleRequirements(roleIndex, e.target.value)}
-                      placeholder="Enter each requirement on a new line:\n\n3+ years Python experience\nStrong knowledge of Django framework\nExperience with REST APIs"
+                      placeholder="Enter each requirement on a new line:
+
+3+ years Python experience
+Strong knowledge of Django framework
+Experience with REST APIs"
                     />
                   </div>
                 </div>
@@ -387,8 +419,52 @@ What You'll Gain:
             <button 
               className="btn btn-primary btn-lg"
               onClick={handlePublish}
+              disabled={isLoading}
             >
-              Publish Job
+              {isLoading ? 'Publishing...' : 'Publish Job'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="modal-overlay">
+          <div className="success-modal">
+            <div className="success-icon">✅</div>
+            <h2>Job Posted Successfully!</h2>
+            <p>Your job posting has been published and is now live.</p>
+            <div className="modal-actions">
+              <button 
+                className="btn btn-secondary"
+                onClick={resetForm}
+              >
+                Add Another Job
+              </button>
+              <button 
+                className="btn btn-primary"
+                onClick={() => {
+                  setShowSuccessModal(false)
+                  window.location.href = '/staffer/talent-matching'
+                }}
+              >
+                Find Talent Match
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Error Toast */}
+      {error && (
+        <div className="error-toast">
+          <div className="error-content">
+            <span className="error-text">{error}</span>
+            <button 
+              className="error-close"
+              onClick={() => setError('')}
+            >
+              ×
             </button>
           </div>
         </div>
