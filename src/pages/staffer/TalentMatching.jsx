@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Search, Eye, Plus, X, Save } from 'lucide-react'
+import { jobsAPI } from '../../api/jobs'
 
 const TalentMatching = () => {
   const [selectedJob, setSelectedJob] = useState(null)
@@ -7,25 +8,26 @@ const TalentMatching = () => {
   const [selectedEmployees, setSelectedEmployees] = useState([])
   const [showEmployeeModal, setShowEmployeeModal] = useState(null)
   const [isMatching, setIsMatching] = useState(false)
+  const [jobs, setJobs] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
 
-  const jobs = [
-    {
-      id: 1,
-      title: "Microsoft Azure Migration",
-      client: "Microsoft",
-      positions: 3,
-      startDate: "Jan 15, 2024",
-      roles: ["Cloud Architect", "DevOps Engineer", "Security Specialist"]
-    },
-    {
-      id: 2,
-      title: "E-commerce Platform Rebuild",
-      client: "Amazon",
-      positions: 5,
-      startDate: "Feb 1, 2024",
-      roles: ["Frontend Developer", "Backend Developer", "UI/UX Designer"]
+  useEffect(() => {
+    fetchJobs()
+  }, [])
+
+  const fetchJobs = async () => {
+    try {
+      setIsLoading(true)
+      setError('')
+      const response = await jobsAPI.getOpenJobs()
+      setJobs(response.data)
+    } catch (error) {
+      setError(error.message || 'Failed to load jobs')
+    } finally {
+      setIsLoading(false)
     }
-  ]
+  }
 
   const employees = [
     {
@@ -116,44 +118,59 @@ const TalentMatching = () => {
         </div>
       ) : !selectedJob ? (
         <div className="job-selection">
-          <div className="card mb-6">
-            <h2 className="text-xl font-semibold mb-4">Select a Project</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {jobs.map((job) => (
-                <div key={job.id} className="job-card card-minimal card-hover">
-                  <h3 className="font-semibold mb-2">{job.title}</h3>
-                  <p className="text-sm text-neutral-500 mb-3">{job.client}</p>
-                  <div className="job-info mb-4">
-                    <div className="flex items-center gap-4 text-sm text-neutral-600">
-                      <span>👥 {job.positions} positions</span>
-                      <span>📅 {job.startDate}</span>
-                    </div>
-                  </div>
-                  <div className="roles mb-4">
-                    {job.roles.map((role) => (
-                      <span key={role} className="skill-chip skill-chip-neutral mr-2 mb-2">
-                        {role}
-                      </span>
-                    ))}
-                  </div>
-                  <button 
-                    className="btn btn-primary w-full"
-                    onClick={() => handleMatchEmployees(job)}
-                  >
-                    Match Employees
-                  </button>
-                </div>
-              ))}
+          {isLoading ? (
+            <div className="text-center py-8">
+              <div className="text-lg">Loading jobs...</div>
             </div>
-          </div>
+          ) : error ? (
+            <div className="text-center py-8">
+              <div className="text-error">{error}</div>
+              <button 
+                className="btn btn-secondary mt-4"
+                onClick={fetchJobs}
+              >
+                Retry
+              </button>
+            </div>
+          ) : (
+            <div className="card mb-6">
+              <h2 className="text-xl font-semibold mb-4">Select a Project</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {jobs.map((job) => (
+                  <div key={job.id} className="job-card card-minimal card-hover">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <h3 className="font-semibold">{job.role}</h3>
+                        <p className="text-sm text-neutral-500">{job.client}</p>
+                      </div>
+                      <span className="text-xs text-neutral-400">📅 {job.startDate}</span>
+                    </div>
+                    <div className="roles mb-4 mt-3">
+                      {job.requiredSkills.map((skill) => (
+                        <span key={skill} className="skill-chip skill-chip-neutral mr-2 mb-2">
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                    <button 
+                      className="btn btn-primary w-full"
+                      onClick={() => handleMatchEmployees(job)}
+                    >
+                      Match Employees
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <div className="matching-interface">
           <div className="selected-job-header card mb-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-semibold">{selectedJob.title}</h2>
-                <p className="text-neutral-500">{selectedJob.client} • {selectedJob.positions} positions needed</p>
+                <h2 className="text-xl font-semibold">{selectedJob.role}</h2>
+                <p className="text-neutral-500">{selectedJob.client}</p>
               </div>
               <div className="flex gap-3">
                 <button 

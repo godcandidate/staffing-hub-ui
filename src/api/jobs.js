@@ -3,6 +3,32 @@ import { authAPI } from './auth'
 const API_BASE_URL = 'http://localhost:8089/api/v1'
 
 export const jobsAPI = {
+  getOpenJobs: async () => {
+    const token = authAPI.getStoredToken()
+    
+    if (!token) {
+      throw new Error('Authentication required')
+    }
+
+    const response = await fetch(`${API_BASE_URL}/staffer/jobs`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch jobs')
+    }
+
+    // Filter only OPEN status jobs
+    const openJobs = data.data.filter(job => job.status === 'OPEN')
+    return { ...data, data: openJobs }
+  },
+
   postJob: async (jobData, attachments = []) => {
     const token = authAPI.getStoredToken()
     
