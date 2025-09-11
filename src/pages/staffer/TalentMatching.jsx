@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Search, Eye, Plus, X, Save } from 'lucide-react'
 import { jobsAPI } from '../../api/jobs'
+import { CircularProgress, Box } from '@mui/material'
 
 const TalentMatching = () => {
   const [selectedJob, setSelectedJob] = useState(null)
@@ -119,9 +120,23 @@ const TalentMatching = () => {
       ) : !selectedJob ? (
         <div className="job-selection">
           {isLoading ? (
-            <div className="text-center py-8">
-              <div className="text-lg">Loading jobs...</div>
-            </div>
+            <Box 
+              display="flex" 
+              flexDirection="column" 
+              alignItems="center" 
+              justifyContent="center" 
+              minHeight={300}
+              gap={2}
+            >
+              <CircularProgress 
+                size={56} 
+                thickness={4}
+                sx={{ 
+                  color: '#dd5928' // Primary brand color
+                }}
+              />
+              <p className="text-gray-600 text-sm">Loading available jobs...</p>
+            </Box>
           ) : error ? (
             <div className="text-center py-8">
               <div className="text-error">{error}</div>
