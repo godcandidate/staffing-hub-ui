@@ -1,4 +1,4 @@
-const KEZIA_API_URL = 'https://lkjp1q7qh4.execute-api.us-west-2.amazonaws.com/ask_staffing_question'
+const KEZIA_API_URL = import.meta.env.VITE_KEZIA_API_URL
 
 export const keziaAPI = {
   askQuestion: async (message) => {

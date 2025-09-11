@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { X, Send, MessageCircle, Minimize2 } from 'lucide-react'
+import { ruthAPI } from '../api/ruth'
 import './RuthPanel.css'
 
 const RuthPanel = ({ isOpen, onClose, jobId }) => {
@@ -35,7 +36,7 @@ const RuthPanel = ({ isOpen, onClose, jobId }) => {
     
     if (isOpen) {
       // Initialize WebSocket connection
-      wsRef.current = new WebSocket('ws://44.248.50.194:6060/api/ai/chatbot/ws')
+      wsRef.current = ruthAPI.createConnection()
       
       wsRef.current.onopen = () => {
         setIsConnected(true)
@@ -109,13 +110,7 @@ const RuthPanel = ({ isOpen, onClose, jobId }) => {
     setCurrentResponse('')
 
     // Send via WebSocket
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      const payload = {
-        user_query: userMessage.text,
-        job_id: jobId || "1"
-      }
-      wsRef.current.send(JSON.stringify(payload))
-    }
+    ruthAPI.sendMessage(wsRef.current, userMessage.text, jobId)
   }
 
   if (!isOpen) return null
