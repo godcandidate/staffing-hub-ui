@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Search, Eye, Plus, X, Save } from 'lucide-react'
 import { jobsAPI } from '../../api/jobs'
 import { talentAPI } from '../../api/talent'
+import { employeeAPI } from '../../api/employee'
 import { CircularProgress, Box } from '@mui/material'
 
 const TalentMatching = () => {
@@ -9,6 +10,8 @@ const TalentMatching = () => {
   const [matchedEmployees, setMatchedEmployees] = useState([])
   const [selectedEmployees, setSelectedEmployees] = useState([])
   const [showEmployeeModal, setShowEmployeeModal] = useState(null)
+  const [employeeDetails, setEmployeeDetails] = useState(null)
+  const [loadingEmployee, setLoadingEmployee] = useState(false)
   const [isMatching, setIsMatching] = useState(false)
   const [jobs, setJobs] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -68,8 +71,38 @@ const TalentMatching = () => {
   }
 
   const removeEmployee = (employeeId) => {
-    setMatchedEmployees(prev => prev.filter(emp => emp.id !== employeeId))
-    setSelectedEmployees(prev => prev.filter(emp => emp.id !== employeeId))
+    if (confirm('Are you sure you want to remove this employee from the matches?')) {
+      setMatchedEmployees(prev => prev.filter(emp => emp.id !== employeeId))
+      setSelectedEmployees(prev => prev.filter(emp => emp.id !== employeeId))
+    }
+  }
+
+  const viewEmployeeDetails = async (employee) => {
+    setShowEmployeeModal(employee)
+    setLoadingEmployee(true)
+    setEmployeeDetails(null)
+    
+    try {
+      const response = await employeeAPI.getEmployeeDetails(employee.id)
+      setEmployeeDetails(response.data)
+    } catch (error) {
+      console.error('Failed to fetch employee details:', error)
+      // Use basic info if API fails
+      setEmployeeDetails({
+        data: {
+          employee: {
+            roles: ['Employee'],
+            experience: 'N/A',
+            skills: {}
+          },
+          user: {
+            name: employee.name
+          }
+        }
+      })
+    } finally {
+      setLoadingEmployee(false)
+    }
   }
 
   const saveSelection = () => {
@@ -217,7 +250,7 @@ const TalentMatching = () => {
                     <div className="employee-actions">
                       <button
                         className="btn btn-ghost btn-sm"
-                        onClick={() => setShowEmployeeModal(employee)}
+                        onClick={() => viewEmployeeDetails(employee)}
                       >
                         <Eye size={16} />
                         View
@@ -244,55 +277,111 @@ const TalentMatching = () => {
           <div className="modal">
             <div className="modal-header">
               <h3>Employee Details</h3>
-              <button onClick={() => setShowEmployeeModal(null)}>
+              <button onClick={() => {
+                setShowEmployeeModal(null)
+                setEmployeeDetails(null)
+              }}>
                 <X size={20} />
               </button>
             </div>
-            <div className="modal-content">
-              <div className="employee-profile">
-                <div className="profile-header mb-4">
-                  <div className="employee-avatar-large">
-                    {showEmployeeModal.name.split(' ').map(n => n[0]).join('')}
-                  </div>
-                  <div>
-                    <h4 className="font-semibold">{showEmployeeModal.name}</h4>
-                    <p className="text-neutral-500">{showEmployeeModal.role}</p>
-                    <p className="text-sm text-neutral-400">{showEmployeeModal.department}</p>
-                  </div>
+            <div className="modal-content p-6">
+              {loadingEmployee ? (
+                <div className="text-center py-12">
+                  <CircularProgress size={48} sx={{ color: '#f97316' }} />
+                  <p className="mt-4 text-neutral-500 text-lg">Loading employee details...</p>
                 </div>
-                <div className="profile-details">
-                  <div className="detail-section mb-4">
-                    <h5 className="font-medium mb-2">Experience</h5>
-                    <p>{showEmployeeModal.experience}</p>
-                  </div>
-                  <div className="detail-section mb-4">
-                    <h5 className="font-medium mb-2">Skills</h5>
-                    <div className="skills-grid">
-                      {showEmployeeModal.skills.map((skill) => (
-                        <span key={skill} className="skill-chip">{skill}</span>
-                      ))}
+              ) : (
+                <div className="employee-profile">
+                  {/* Header Section */}
+                  <div className="profile-header mb-8 p-6 bg-gradient-to-r from-orange-50 to-orange-100 rounded-xl border border-orange-200">
+                    <div className="flex items-center gap-6">
+                      <div className="w-20 h-20 bg-gradient-to-br from-orange-400 to-orange-600 text-white rounded-full flex items-center justify-center text-2xl font-bold shadow-lg">
+                        {showEmployeeModal.name.split(' ').map(n => n[0]).join('')}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="text-2xl font-bold text-gray-800 mb-2">{employeeDetails?.data?.user?.name || showEmployeeModal.name}</h4>
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2 bg-green-100 px-3 py-1 rounded-full">
+                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <span className="text-lg font-semibold text-green-700">{showEmployeeModal.matchScore}%</span>
+                            <span className="text-green-600 text-sm">match</span>
+                          </div>
+                          <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">Available</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="detail-section">
-                    <h5 className="font-medium mb-2">Availability</h5>
-                    <span className={`badge ${
-                      showEmployeeModal.availability === 'Available' ? 'badge-accepted' : 'badge-pending'
-                    }`}>
-                      {showEmployeeModal.availability}
-                    </span>
-                  </div>
+                  
+                  {employeeDetails && (
+                    <div className="profile-details space-y-6">
+                      {/* Info Grid */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                          <h5 className="font-semibold mb-3 text-gray-800 text-lg">Roles</h5>
+                          <div className="flex flex-wrap gap-2">
+                            {employeeDetails.data.employee.roles.map((role, index) => (
+                              <span key={index} className="px-3 py-1 bg-blue-500 text-white rounded-lg text-sm font-medium">
+                                {role}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                          <h5 className="font-semibold mb-3 text-gray-800 text-lg">Experience</h5>
+                          <p className="text-gray-700 font-medium text-lg">{employeeDetails.data.employee.experience}</p>
+                        </div>
+                      </div>
+                      
+                      {/* Skills Section */}
+                      {Object.keys(employeeDetails.data.employee.skills).length > 0 && (
+                        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                          <h5 className="font-semibold mb-4 text-gray-800 text-lg">Skills & Expertise</h5>
+                          <div className="space-y-3">
+                            {Object.entries(employeeDetails.data.employee.skills).map(([skill, level]) => (
+                              <div key={skill} className="flex justify-between items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                <span className="font-medium text-gray-800 text-base">{skill}</span>
+                                <span className={`px-3 py-1 rounded-full font-medium text-sm ${
+                                  level === 'Expert' ? 'bg-green-500 text-white' :
+                                  level === 'Advanced' ? 'bg-blue-500 text-white' :
+                                  level === 'Intermediate' ? 'bg-yellow-500 text-white' :
+                                  'bg-gray-500 text-white'
+                                }`}>
+                                  {level}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
-              </div>
+              )}
             </div>
-            <div className="modal-actions">
+            <div className="modal-actions p-6 bg-gray-50 border-t border-gray-200 flex gap-3 justify-end">
               <button 
-                className="btn btn-primary"
+                className="btn btn-secondary px-6 py-2"
+                onClick={() => {
+                  setShowEmployeeModal(null)
+                  setEmployeeDetails(null)
+                }}
+              >
+                Close
+              </button>
+              <button 
+                className={`btn px-6 py-2 ${
+                  selectedEmployees.find(emp => emp.id === showEmployeeModal.id) 
+                    ? 'bg-red-500 hover:bg-red-600 text-white' 
+                    : 'bg-orange-500 hover:bg-orange-600 text-white'
+                }`}
                 onClick={() => {
                   toggleEmployeeSelection(showEmployeeModal)
                   setShowEmployeeModal(null)
+                  setEmployeeDetails(null)
                 }}
               >
-                {selectedEmployees.find(emp => emp.id === showEmployeeModal.id) ? 'Remove' : 'Add'} to Selection
+                {selectedEmployees.find(emp => emp.id === showEmployeeModal.id) ? 'Remove from' : 'Add to'} Selection
               </button>
             </div>
           </div>
