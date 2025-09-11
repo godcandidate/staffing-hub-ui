@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react'
+import { Plus, Edit, Trash2, Eye, EyeOff, X, Save } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { jobsAPI } from '../../api/jobs'
 import { CircularProgress, Box } from '@mui/material'
@@ -9,6 +9,9 @@ const JobManagement = () => {
   const [jobs, setJobs] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  const [editingJob, setEditingJob] = useState(null)
+  const [deleteConfirm, setDeleteConfirm] = useState(null)
+  const [isUpdating, setIsUpdating] = useState(false)
 
   useEffect(() => {
     fetchJobs()
@@ -56,6 +59,70 @@ const JobManagement = () => {
     if (job.status === 'filled') return 'Completed'
     if (job.rolesFilled > 0) return 'In Progress'
     return 'Open'
+  }
+
+  const handleEditJob = (job) => {
+    setEditingJob({
+      id: job.id,
+      title: job.title,
+      team: job.team,
+      status: job.status
+    })
+  }
+
+  const handleUpdateJob = async () => {
+    if (!editingJob) return
+
+    try {
+      setIsUpdating(true)
+      await jobsAPI.updateJob(editingJob.id, {
+        role: editingJob.title,
+        client: editingJob.team,
+        status: editingJob.status === 'active' ? 'OPEN' : 'CLOSED'
+      })
+      
+      // Update local state
+      setJobs(prevJobs => 
+        prevJobs.map(job => 
+          job.id === editingJob.id 
+            ? { ...job, title: editingJob.title, team: editingJob.team, status: editingJob.status }
+            : job
+        )
+      )
+      
+      setEditingJob(null)
+    } catch (error) {
+      setError(error.message || 'Failed to update job')
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
+  const handleDeleteJob = async (jobId) => {
+    try {
+      setIsLoading(true)
+      await jobsAPI.deleteJob(jobId)
+      
+      // Remove from local state
+      setJobs(prevJobs => prevJobs.filter(job => job.id !== jobId))
+      setDeleteConfirm(null)
+    } catch (error) {
+      setError(error.message || 'Failed to delete job')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const confirmDelete = (job) => {
+    setDeleteConfirm(job)
+  }
+
+  const cancelEdit = () => {
+    setEditingJob(null)
+  }
+
+  const cancelDelete = () => {
+    setDeleteConfirm(null)
   }
 
   return (
@@ -174,10 +241,18 @@ const JobManagement = () => {
                     </Link>
                   </>
                 )}
-                <button className="icon-btn" title="Edit">
+                <button 
+                  className="icon-btn" 
+                  title="Edit"
+                  onClick={() => handleEditJob(job)}
+                >
                   <Edit size={16} />
                 </button>
-                <button className="icon-btn text-error" title="Delete">
+                <button 
+                  className="icon-btn text-error" 
+                  title="Delete"
+                  onClick={() => confirmDelete(job)}
+                >
                   <Trash2 size={16} />
                 </button>
               </div>
@@ -200,6 +275,128 @@ const JobManagement = () => {
               Post Your First Job
             </Link>
           )}
+        </div>
+      )}
+      
+      {/* Edit Job Modal */}
+      {editingJob && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal-header">
+              <h3>Edit Job</h3>
+              <button onClick={cancelEdit}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-content">
+              <div className="form-group mb-4">
+                <label className="form-label">Job Title</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={editingJob.title}
+                  onChange={(e) => setEditingJob(prev => ({ ...prev, title: e.target.value }))}
+                />
+              </div>
+              <div className="form-group mb-4">
+                <label className="form-label">Client/Team</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={editingJob.team}
+                  onChange={(e) => setEditingJob(prev => ({ ...prev, team: e.target.value }))}
+                />
+              </div>
+              <div className="form-group mb-4">
+                <label className="form-label">Status</label>
+                <select
+                  className="form-input"
+                  value={editingJob.status}
+                  onChange={(e) => setEditingJob(prev => ({ ...prev, status: e.target.value }))}
+                >
+                  <option value="active">Active</option>
+                  <option value="filled">Filled</option>
+                </select>
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button
+                className="btn btn-ghost"
+                onClick={cancelEdit}
+                disabled={isUpdating}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={handleUpdateJob}
+                disabled={isUpdating}
+              >
+                {isUpdating ? (
+                  <>
+                    <CircularProgress size={16} />
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    <Save size={16} />
+                    Update Job
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal-header">
+              <h3>Delete Job</h3>
+              <button onClick={cancelDelete}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-content">
+              <p className="mb-4">
+                Are you sure you want to delete the job "{deleteConfirm.title}"? 
+                This action cannot be undone.
+              </p>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+                <p className="text-yellow-800 text-sm">
+                  ⚠️ This will permanently remove the job posting and all associated applications.
+                </p>
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button
+                className="btn btn-ghost"
+                onClick={cancelDelete}
+                disabled={isLoading}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn-danger"
+                onClick={() => handleDeleteJob(deleteConfirm.id)}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <CircularProgress size={16} />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={16} />
+                    Delete Job
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

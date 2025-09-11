@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { X, Send, Star, Eye } from 'lucide-react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { X, Send, Star, Eye, ArrowLeft } from 'lucide-react'
 
 const CandidateMatching = () => {
   const { jobId } = useParams()
+  const navigate = useNavigate()
   const [selectedCandidates, setSelectedCandidates] = useState([])
   const [showEmployeeModal, setShowEmployeeModal] = useState(null)
   const [activeTab, setActiveTab] = useState('ai')
@@ -106,8 +107,23 @@ const CandidateMatching = () => {
     setSelectedCandidates([])
   }
 
+  const handleBackToJobManagement = () => {
+    navigate('/staffer/jobs')
+  }
+
   return (
     <div className="candidate-matching">
+      {/* Back Navigation */}
+      <div className="mb-4">
+        <button
+          onClick={handleBackToJobManagement}
+          className="btn btn-outline btn-sm flex items-center gap-2"
+        >
+          <ArrowLeft size={16} />
+          Back to Job Management
+        </button>
+      </div>
+
       {/* Job Header */}
       <div className="job-banner card mb-6">
         <div className="flex items-center justify-between">

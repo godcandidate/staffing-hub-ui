@@ -288,5 +288,53 @@ export const jobsAPI = {
     }
 
     return data
+  },
+
+  updateJob: async (jobId, jobData) => {
+    const token = authAPI.getStoredToken()
+    
+    if (!token) {
+      throw new Error('Authentication required')
+    }
+
+    const response = await fetch(`${API_BASE_URL}/staffer/jobs/${jobId}`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(jobData)
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to update job')
+    }
+
+    return data
+  },
+
+  deleteJob: async (jobId) => {
+    const token = authAPI.getStoredToken()
+    
+    if (!token) {
+      throw new Error('Authentication required')
+    }
+
+    const response = await fetch(`${API_BASE_URL}/staffer/jobs/${jobId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+
+    if (!response.ok) {
+      const data = await response.json()
+      throw new Error(data.message || 'Failed to delete job')
+    }
+
+    return { success: true }
   }
 }
