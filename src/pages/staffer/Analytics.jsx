@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Download, TrendingUp, Users, Clock, CheckCircle } from 'lucide-react'
 import { jobsAPI } from '../../api/jobs'
+import { CircularProgress, Box } from '@mui/material'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -200,12 +201,23 @@ const Analytics = () => {
             </div>
           </div>
         </div>
-        <div className="flex items-center justify-center py-12">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-gray">Loading analytics data...</p>
-          </div>
-        </div>
+        <Box 
+          display="flex" 
+          flexDirection="column" 
+          alignItems="center" 
+          justifyContent="center" 
+          minHeight={400}
+          gap={2}
+        >
+          <CircularProgress 
+            size={56} 
+            thickness={4}
+            sx={{ 
+              color: '#dd5928' // Primary brand color
+            }}
+          />
+          <p className="text-gray-600 text-sm">Loading analytics data...</p>
+        </Box>
       </div>
     )
   }

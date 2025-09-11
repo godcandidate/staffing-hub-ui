@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { jobsAPI } from '../../api/jobs'
+import { CircularProgress, Box } from '@mui/material'
 
 const JobManagement = () => {
   const [activeTab, setActiveTab] = useState('active')
@@ -24,7 +25,7 @@ const JobManagement = () => {
         title: job.role,
         team: job.client,
         status: job.status === 'OPEN' ? 'active' : 'filled',
-        applications: 0, // Set to 0 as requested
+        applications: job.applicationCount,
         postedDate: new Date(job.createdAt).toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'short',
@@ -92,9 +93,23 @@ const JobManagement = () => {
 
       {/* Jobs Table */}
       {isLoading ? (
-        <div className="text-center py-8">
-          <div className="text-lg">Loading jobs...</div>
-        </div>
+        <Box 
+          display="flex" 
+          flexDirection="column" 
+          alignItems="center" 
+          justifyContent="center" 
+          minHeight={300}
+          gap={2}
+        >
+          <CircularProgress 
+            size={48} 
+            thickness={4}
+            sx={{ 
+              color: '#dd5928' // Primary brand color
+            }}
+          />
+          <p className="text-gray-600 text-sm">Loading jobs...</p>
+        </Box>
       ) : error ? (
         <div className="text-center py-8">
           <div className="text-error">{error}</div>
@@ -112,10 +127,10 @@ const JobManagement = () => {
             <div>#</div>
             <div>Job Title</div>
             <div>Client</div>
-            <div>Status</div>
             <div>Applications</div>
             <div>Posted</div>
-            <div>Actions</div>
+            <div className="text-center">Status</div>
+            <div className="text-center">Actions</div>
           </div>
         </div>
         
@@ -132,17 +147,17 @@ const JobManagement = () => {
                 <span className="text-neutral-600">{job.team}</span>
               </div>
               <div>
-                <span className={`badge ${getStatusBadge(job)}`}>
-                  {getStatusText(job)}
-                </span>
-              </div>
-              <div>
                 <span className="font-medium">{job.applications}</span>
               </div>
               <div>
                 <span className="text-neutral-500 text-sm">{job.postedDate}</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="text-center">
+                <span className={`badge ${getStatusBadge(job)}`}>
+                  {getStatusText(job)}
+                </span>
+              </div>
+              <div className="flex items-center justify-center gap-2">
                 {job.status === 'active' && (
                   <>
                     <Link
