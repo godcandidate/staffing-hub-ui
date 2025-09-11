@@ -1,6 +1,7 @@
 import { authAPI } from './auth'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8089/api/v1'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8089/api/v1';
+const RECOMMENDED_JOB_POSTINGS_URL = import.meta.env.VITE_RECOMMENDED_JOB_POSTINGS_URL || 'http://44.248.50.194:6060/api/ai/chatbot/recommend_job_postings';
 
 export const jobsAPI = {
   getOpenJobs: async () => {
@@ -96,6 +97,26 @@ export const jobsAPI = {
 
     if (!response.ok) {
       throw new Error(data.message || 'Failed to fetch job details')
+    }
+
+    return data
+  },
+
+  getRecommendedJobs: async () => {
+    const user = authAPI.getStoredUser()
+    
+    if (!user || !user.id) {
+      throw new Error('User not found. Please log in again.')
+    }
+
+    const response = await fetch(`${RECOMMENDED_JOB_POSTINGS_URL}/${user.id}`, {
+      method: 'GET',
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch recommended jobs')
     }
 
     return data

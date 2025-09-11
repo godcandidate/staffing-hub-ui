@@ -1,74 +1,129 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Search, Filter, Star } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { jobsAPI } from '../../api/jobs'
 
 const JobsBoard = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedSkill, setSelectedSkill] = useState('')
   const [selectedDuration, setSelectedDuration] = useState('')
+  const [jobs, setJobs] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-  const jobs = [
-    {
-      id: 1,
-      title: "Senior Data Analyst",
-      team: "Analytics Team",
-      duration: "6 months",
-      skills: ["Python", "SQL", "Power BI"],
-      startDate: "Jan 15, 2024",
-      isRecommended: true,
-      matchPercent: 92
-    },
-    {
-      id: 2,
-      title: "Frontend Developer",
-      team: "Product Team",
-      duration: "4 months",
-      skills: ["React", "TypeScript", "CSS"],
-      startDate: "Feb 1, 2024",
-      isRecommended: true,
-      matchPercent: 87
-    },
-    {
-      id: 3,
-      title: "DevOps Engineer",
-      team: "Infrastructure",
-      duration: "8 months",
-      skills: ["AWS", "Docker", "Kubernetes"],
-      startDate: "Jan 22, 2024",
-      isRecommended: false
-    },
-    {
-      id: 4,
-      title: "UX Designer",
-      team: "Design Team",
-      duration: "3 months",
-      skills: ["Figma", "User Research", "Prototyping"],
-      startDate: "Feb 5, 2024",
-      isRecommended: false
-    },
-    {
-      id: 5,
-      title: "Backend Developer",
-      team: "Engineering",
-      duration: "12 months",
-      skills: ["Node.js", "MongoDB", "API Design"],
-      startDate: "Jan 30, 2024",
-      isRecommended: true,
-      matchPercent: 78
+  useEffect(() => {
+    const fetchRecommendedJobs = async () => {
+      try {
+        setLoading(true)
+        const response = await jobsAPI.getRecommendedJobs()
+        
+        // Check if response has the expected structure
+        if (!response || !response.data || !Array.isArray(response.data)) {
+          throw new Error('Invalid response format from recommended jobs API')
+        }
+        
+        // Transform the API response to match the expected format
+        const transformedJobs = response.data.map(jobItem => {
+          // Defensive checks for nested data
+          const jobData = jobItem.job_posting_data || {}
+          const matchScore = jobItem.match_score || '0%'
+          
+          return {
+            id: jobData.id,
+            title: jobData.role || 'Unknown Role',
+            team: `${jobData.client || 'Unknown Company'} Team`,
+            duration: jobData.duration || 'TBD',
+            skills: jobData.required_skills || [],
+            startDate: jobData.start_date ? 
+              new Date(jobData.start_date).toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric', 
+                year: 'numeric' 
+              }) : 'TBD',
+            isRecommended: true,
+            matchPercent: parseInt(matchScore.replace('%', '')) || 0,
+            company: jobData.client || 'Unknown Company',
+            status: jobData.status || 'UNKNOWN',
+            // Add additional data needed for job detail page
+            companyDescription: jobData.client_description || 'No description available',
+            responsibilities: jobData.role_requirements ? 
+              jobData.role_requirements.split('\\n').filter(req => req.trim()) : 
+              [],
+            teamContact: {
+              name: jobData.team_contact || "Team Lead",
+              role: "Team Manager", 
+              email: jobData.contact_email || "team@company.com"
+            },
+            attachments: jobData.attachments || []
+          }
+        })
+
+        // Sort by match percentage (highest first)
+        transformedJobs.sort((a, b) => b.matchPercent - a.matchPercent)
+        
+        setJobs(transformedJobs)
+      } catch (err) {
+        setError(err.message)
+        console.error('Error fetching recommended jobs:', err)
+      } finally {
+        setLoading(false)
+      }
     }
-  ]
 
-  const skills = ["Python", "React", "AWS", "SQL", "TypeScript", "Docker", "Figma", "Node.js"]
-  const durations = ["3 months", "4 months", "6 months", "8 months", "12 months"]
+    fetchRecommendedJobs()
+  }, [])
 
-  const filteredJobs = jobs.filter(job => {
-    const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         job.team.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesSkill = !selectedSkill || job.skills.includes(selectedSkill)
+  // Extract unique skills and durations from jobs for filter options
+  const skills = jobs.length > 0 ? [...new Set(jobs.flatMap(job => job.skills || []))].filter(skill => skill).sort() : []
+  const durations = jobs.length > 0 ? [...new Set(jobs.map(job => job.duration).filter(duration => duration))].sort() : []
+
+  // Filter out closed jobs for both filtering and counting
+  const openJobs = jobs.filter(job => job.status === 'OPEN')
+
+  const filteredJobs = openJobs.filter(job => {
+    const matchesSearch = (job.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (job.team || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (job.company || '').toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSkill = !selectedSkill || (job.skills && job.skills.includes(selectedSkill))
     const matchesDuration = !selectedDuration || job.duration === selectedDuration
     
-    return job.isRecommended && matchesSearch && matchesSkill && matchesDuration
+    return matchesSearch && matchesSkill && matchesDuration
   })
+
+  if (loading) {
+    return (
+      <div className="jobs-board">
+        <div className="page-header mb-6">
+          <h1>Recommended Jobs</h1>
+          <p className="text-gray">AI-curated opportunities that match your skills and interests</p>
+        </div>
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading recommended jobs...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="jobs-board">
+        <div className="page-header mb-6">
+          <h1>Recommended Jobs</h1>
+          <p className="text-gray">AI-curated opportunities that match your skills and interests</p>
+        </div>
+        <div className="error-container">
+          <p className="error-message">Error: {error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="btn btn-secondary"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="jobs-board">
@@ -118,7 +173,7 @@ const JobsBoard = () => {
       {/* Results */}
       <div className="results-header mb-4">
         <p className="text-gray">
-          Showing {filteredJobs.length} of {jobs.length} opportunities
+          Showing {filteredJobs.length} of {openJobs.length} available opportunities
         </p>
       </div>
 
@@ -130,19 +185,17 @@ const JobsBoard = () => {
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <h3 className="font-semibold mb-1">{job.title}</h3>
-                  <p className="text-sm text-gray">{job.team}</p>
+                  <p className="text-sm text-gray">{job.company}</p>
                 </div>
                 <div className="flex flex-col items-end gap-2">
-                  {job.isRecommended && (
+                  {job.matchPercent > 80 && (
                     <span className="badge badge-recommended">
                       Recommended
                     </span>
                   )}
-                  {job.matchPercent && (
-                    <span className="match-percent">
-                      {job.matchPercent}% match
-                    </span>
-                  )}
+                  <span className="match-percent">
+                    {job.matchPercent}% match
+                  </span>
                 </div>
               </div>
             </div>
@@ -154,17 +207,23 @@ const JobsBoard = () => {
               </div>
 
               <div className="skills-section">
-                {job.skills.map((skill) => (
+                {job.skills.slice(0, 4).map((skill) => (
                   <span key={skill} className="skill-chip">
                     {skill}
                   </span>
                 ))}
+                {job.skills.length > 4 && (
+                  <span className="skill-chip skill-more">
+                    +{job.skills.length - 4} more
+                  </span>
+                )}
               </div>
             </div>
 
             <div className="job-actions flex justify-between">
               <Link 
                 to={`/employee/jobs/${job.id}`}
+                state={{ jobData: job }}
                 className="btn btn-secondary"
               >
                 View Details
