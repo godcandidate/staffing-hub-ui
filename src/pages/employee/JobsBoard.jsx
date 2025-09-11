@@ -223,7 +223,22 @@ const JobsBoard = () => {
             <div className="job-actions flex justify-between">
               <Link 
                 to={`/employee/jobs/${job.id}`}
-                state={{ jobData: job }}
+                state={{ 
+                  job: {
+                    id: job.id,
+                    role: job.title,
+                    client: job.company,
+                    duration: job.duration,
+                    startDate: job.startDate,
+                    status: job.status,
+                    clientDescription: job.companyDescription,
+                    roleRequirements: job.responsibilities.join('\n'),
+                    requiredSkills: job.skills,
+                    teamContact: job.teamContact?.name || "Team Lead",
+                    contactEmail: job.teamContact?.email || "team@company.com",
+                    attachments: job.attachments || []
+                  }
+                }}
                 className="btn btn-secondary"
               >
                 View Details

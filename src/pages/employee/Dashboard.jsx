@@ -8,7 +8,7 @@ const Dashboard = () => {
   const [allJobsData, setAllJobsData] = useState([])
   const [dashboardStats, setDashboardStats] = useState({
     newMatchingRoles: 0,
-    pendingApplications: 0,
+    applications: 0,
     profileCompleteness: 0
   })
   const [userProfile, setUserProfile] = useState({
@@ -113,9 +113,9 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-3xl font-bold text-warning mb-1">
-                {dashboardStats.pendingApplications}
+                {dashboardStats.applications}
               </h3>
-              <p className="text-sm text-neutral-600">Applications pending</p>
+              <p className="text-sm text-neutral-600">Total applications</p>
             </div>
             <div className="p-3 bg-warning-bg rounded-lg">
               <div className="w-6 h-6 bg-warning rounded-full"></div>

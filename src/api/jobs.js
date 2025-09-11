@@ -207,8 +207,8 @@ export const jobsAPI = {
       console.warn('Could not fetch profile for completeness calculation:', error)
     }
 
-    // Get actual pending applications count
-    let pendingApplications = 0
+    // Get actual applications count
+    let applications = 0
     try {
       const applicationsResponse = await fetch(`${API_BASE_URL}/employee/applications`, {
         headers: {
@@ -218,16 +218,16 @@ export const jobsAPI = {
       })
       if (applicationsResponse.ok) {
         const applicationsData = await applicationsResponse.json()
-        pendingApplications = applicationsData.data.filter(app => app.status === 'PENDING').length
+        applications = applicationsData.data.length
       }
     } catch (error) {
-      console.warn('Could not fetch applications for pending count:', error)
+      console.warn('Could not fetch applications for count:', error)
     }
 
     return {
       data: {
         newMatchingRoles,
-        pendingApplications,
+        applications,
         profileCompleteness
       }
     }
