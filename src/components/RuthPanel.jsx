@@ -36,7 +36,7 @@ const RuthPanel = ({ isOpen, onClose, jobId }) => {
     
     if (isOpen) {
       // Initialize WebSocket connection
-      wsRef.current = ruthAPI.createConnection()
+      wsRef.current = ruthAPI.createConnection(jobId)
       
       wsRef.current.onopen = () => {
         setIsConnected(true)
