@@ -1,11 +1,14 @@
 import { useState } from 'react'
-import { Sparkles, Upload, X } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Sparkles, Upload, X, List } from 'lucide-react'
+import { jobsAPI } from '../../api/jobs'
 
 const PostJob = () => {
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    skills: [],
+    roles: [{ name: '', requirements: '', skills: [] }],
     startDate: '',
     duration: '',
     rolesCount: 1,
@@ -15,31 +18,64 @@ const PostJob = () => {
   const [skillInput, setSkillInput] = useState('')
   const [attachments, setAttachments] = useState([])
   const [currentStep, setCurrentStep] = useState(1)
+  const [isLoading, setIsLoading] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [error, setError] = useState('')
 
-  const suggestedSkills = [
-    'JavaScript', 'Python', 'React', 'Node.js', 'AWS', 'Docker', 
-    'TypeScript', 'SQL', 'MongoDB', 'Kubernetes', 'GraphQL', 'Vue.js'
-  ]
-
-  const handleInputChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+  const popularSkills = {
+    frontend: ['React', 'JavaScript', 'TypeScript', 'Vue.js', 'Angular', 'CSS', 'HTML'],
+    backend: ['Node.js', 'Python', 'Java', 'C#', '.NET', 'PHP', 'Ruby'],
+    devops: ['AWS', 'Docker', 'Kubernetes', 'Jenkins', 'Terraform', 'Azure', 'GCP'],
+    data: ['SQL', 'Python', 'R', 'Tableau', 'Power BI', 'Spark', 'MongoDB']
   }
 
-  const addSkill = (skill) => {
-    if (skill && !formData.skills.includes(skill)) {
-      setFormData(prev => ({
-        ...prev,
-        skills: [...prev.skills, skill]
-      }))
-      setSkillInput('')
+  const handleInputChange = (field, value) => {
+    if (field === 'rolesCount') {
+      const count = parseInt(value)
+      const newRoles = Array.from({ length: count }, (_, i) => 
+        formData.roles[i] || { name: '', requirements: '', skills: [] }
+      )
+      setFormData(prev => ({ ...prev, [field]: count, roles: newRoles }))
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }))
     }
   }
 
-  const removeSkill = (skillToRemove) => {
-    setFormData(prev => ({
-      ...prev,
-      skills: prev.skills.filter(skill => skill !== skillToRemove)
-    }))
+  const updateRoleName = (roleIndex, name) => {
+    const newRoles = [...formData.roles]
+    newRoles[roleIndex].name = name
+    setFormData(prev => ({ ...prev, roles: newRoles }))
+  }
+
+  const updateRoleRequirements = (roleIndex, requirements) => {
+    const newRoles = [...formData.roles]
+    newRoles[roleIndex].requirements = requirements
+    setFormData(prev => ({ ...prev, roles: newRoles }))
+  }
+
+  const formatToBullets = (roleIndex) => {
+    const role = formData.roles[roleIndex]
+    if (!role.requirements) return
+    
+    const lines = role.requirements.split('\n').filter(line => line.trim())
+    const bulletPoints = lines.map(line => {
+      const trimmed = line.trim()
+      return trimmed.startsWith('•') ? trimmed : `• ${trimmed}`
+    }).join('\n')
+    updateRoleRequirements(roleIndex, bulletPoints)
+  }
+
+  const toggleSkill = (roleIndex, skill) => {
+    const newRoles = [...formData.roles]
+    const currentSkills = newRoles[roleIndex].skills
+    
+    if (currentSkills.includes(skill)) {
+      newRoles[roleIndex].skills = currentSkills.filter(s => s !== skill)
+    } else if (currentSkills.length < 3) {
+      newRoles[roleIndex].skills = [...currentSkills, skill]
+    }
+    
+    setFormData(prev => ({ ...prev, roles: newRoles }))
   }
 
   const enhanceWithAI = () => {
@@ -66,9 +102,33 @@ What You'll Gain:
     setCurrentStep(2)
   }
 
-  const handlePublish = () => {
-    console.log('Job posted:', formData)
-    alert('Job posted successfully!')
+  const handlePublish = async () => {
+    try {
+      setIsLoading(true)
+      setError('')
+      await jobsAPI.postJob(formData, attachments)
+      setShowSuccessModal(true)
+    } catch (error) {
+      setError(error.message || 'Failed to post job')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const resetForm = () => {
+    setCurrentStep(1)
+    setFormData({
+      title: '',
+      description: '',
+      roles: [{ name: '', requirements: '', skills: [] }],
+      startDate: '',
+      duration: '',
+      rolesCount: 1,
+      teamContact: '',
+      contactEmail: ''
+    })
+    setAttachments([])
+    setShowSuccessModal(false)
   }
 
   return (
@@ -79,43 +139,31 @@ What You'll Gain:
       </div>
 
       {currentStep === 1 ? (
-        <form onSubmit={handleNext} className="job-form">
-        <div className="max-w-4xl">
-          {/* Main Form */}
-          <div className="lg:col-span-2">
+        <div className="max-w-2xl mx-auto">
+          <form onSubmit={handleNext} className="job-form">
             <div className="card mb-6">
               <h3 className="mb-4">Job Details</h3>
               
               <div className="form-group mb-4">
-                <label className="form-label">Job Title *</label>
+                <label className="form-label">Client Name *</label>
                 <input
                   type="text"
                   className="form-input"
                   value={formData.title}
                   onChange={(e) => handleInputChange('title', e.target.value)}
-                  placeholder="e.g. Senior Frontend Developer"
+                  placeholder="e.g. Microsoft, Amazon, Google"
                   required
                 />
               </div>
 
               <div className="form-group mb-4">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="form-label">Job Description *</label>
-                  <button
-                    type="button"
-                    className="ai-enhance"
-                    onClick={enhanceWithAI}
-                  >
-                    <Sparkles size={16} />
-                    AI Enhance
-                  </button>
-                </div>
+                <label className="form-label">Client Description *</label>
                 <textarea
                   className="form-textarea"
                   rows={8}
                   value={formData.description}
                   onChange={(e) => handleInputChange('description', e.target.value)}
-                  placeholder="Describe the role, responsibilities, and what the candidate will work on..."
+                  placeholder="Describe the client, project overview, and what the engagement involves..."
                   required
                 />
               </div>
@@ -164,63 +212,89 @@ What You'll Gain:
             </div>
 
             <div className="card mb-6">
-              <h3 className="mb-4">Required Skills</h3>
+              <h3 className="mb-4">Role Requirements</h3>
               
-              <div className="form-group mb-4">
-                <label className="form-label">Add Skills</label>
-                <div className="skill-input-container">
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={skillInput}
-                    onChange={(e) => setSkillInput(e.target.value)}
-                    placeholder="Type a skill and press Enter"
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault()
-                        addSkill(skillInput)
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div className="suggested-skills mb-4">
-                <p className="text-sm text-gray mb-2">Suggested skills:</p>
-                <div className="flex flex-wrap gap-2">
-                  {suggestedSkills.map((skill) => (
-                    <button
-                      key={skill}
-                      type="button"
-                      className="skill-suggestion"
-                      onClick={() => addSkill(skill)}
-                    >
-                      + {skill}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="selected-skills">
-                <p className="text-sm text-gray mb-2">Selected skills:</p>
-                <div className="flex flex-wrap gap-2">
-                  {formData.skills.map((skill) => (
-                    <span key={skill} className="skill-chip-removable">
-                      {skill}
+              {formData.roles.map((role, roleIndex) => (
+                <div key={roleIndex} className="role-section mb-6 p-4 border border-neutral-200 rounded-lg">
+                  <div className="form-group mb-3">
+                    <label className="form-label">Role Name</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={role.name}
+                      onChange={(e) => updateRoleName(roleIndex, e.target.value)}
+                      placeholder={`e.g. Senior Developer, Junior Analyst`}
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="form-label">Role Requirements</label>
                       <button
                         type="button"
-                        onClick={() => removeSkill(skill)}
-                        className="remove-skill"
+                        className="btn btn-primary"
+                        onClick={() => formatToBullets(roleIndex)}
                       >
-                        <X size={14} />
+                        <List size={16} />
+                        Bullet List
                       </button>
-                    </span>
-                  ))}
+                    </div>
+                    <textarea
+                      className="form-textarea"
+                      rows={4}
+                      value={role.requirements}
+                      onChange={(e) => updateRoleRequirements(roleIndex, e.target.value)}
+                      placeholder="Enter each requirement on a new line:
+
+3+ years Python experience
+Strong knowledge of Django framework
+Experience with REST APIs"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Required Skills (Max 3)</label>
+                    <div className="skills-categories mb-3">
+                      {Object.entries(popularSkills).map(([category, skills]) => (
+                        <div key={category} className="skill-category mb-3">
+                          <h4 className="text-sm font-medium text-neutral-600 mb-2 capitalize">{category === 'data' ? 'Data Engineering' : category}</h4>
+                          <div className="skills-grid">
+                            {skills.map(skill => (
+                              <button
+                                key={skill}
+                                type="button"
+                                className={`skill-tag ${
+                                  role.skills.includes(skill) ? 'skill-tag-selected' : 'skill-tag-available'
+                                } ${role.skills.length >= 3 && !role.skills.includes(skill) ? 'skill-tag-disabled' : ''}`}
+                                onClick={() => toggleSkill(roleIndex, skill)}
+                                disabled={role.skills.length >= 3 && !role.skills.includes(skill)}
+                              >
+                                {skill}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {role.skills.length > 0 && (
+                      <div className="selected-skills">
+                        <p className="text-sm text-neutral-600 mb-2">Selected Skills ({role.skills.length}/3):</p>
+                        <div className="skills-grid">
+                          {role.skills.map(skill => (
+                            <span key={skill} className="skill-chip skill-chip-selected">
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
 
-            <div className="card">
+            <div className="card mb-6">
               <h3 className="mb-4">Team Contact</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -249,51 +323,218 @@ What You'll Gain:
                 </div>
               </div>
             </div>
+
+            <div className="card">
+              <h3 className="mb-4">Attach Files</h3>
+              
+              <div className="upload-area mb-4">
+                <Upload size={24} className="text-neutral-400 mb-2" />
+                <p className="text-sm text-neutral-500 mb-2">Drag & drop files here or click to browse</p>
+                <input
+                  type="file"
+                  multiple
+                  className="hidden"
+                  id="file-upload"
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files)
+                    setAttachments(prev => [...prev, ...files])
+                  }}
+                />
+                <label htmlFor="file-upload" className="btn btn-secondary btn-sm cursor-pointer">
+                  Choose Files
+                </label>
+              </div>
+
+              {attachments.length > 0 && (
+                <div className="attachments-list">
+                  <p className="text-sm font-medium mb-3">Attached Files ({attachments.length})</p>
+                  {attachments.map((file, index) => (
+                    <div key={index} className="attachment-item flex items-center justify-between p-3 bg-neutral-50 rounded-md mb-2">
+                      <span className="text-sm">{file.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => setAttachments(prev => prev.filter((_, i) => i !== index))}
+                        className="text-error hover:bg-error hover:text-white p-1 rounded"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            <div className="form-actions mt-6">
+              <button type="submit" className="btn btn-primary">
+                Next: Preview
+              </button>
+            </div>
+          </form>
+        </div>
+      ) : (
+        <div className="max-w-4xl mx-auto">
+          <div className="preview-header mb-8">
+            <h1 className="text-3xl font-bold text-neutral-900 mb-2">{formData.title}</h1>
+            <div className="flex items-center gap-4 text-neutral-500">
+              <span>📅 Starts {formData.startDate}</span>
+              <span>⏱️ {formData.duration}</span>
+              <span>👥 {formData.rolesCount} positions</span>
+            </div>
           </div>
 
-          <div className="form-actions mt-6">
-            <button type="submit" className="btn btn-primary">
-              Next: Preview
-            </button>
-          </div>
-        </div>
-      </form>
-      ) : (
-        <div className="preview-section">
-          <div className="card">
-            <h3 className="mb-4">Job Preview</h3>
-            <div className="preview-content">
-              <h4>{formData.title}</h4>
-              <p className="mb-4">{formData.description}</p>
-              <div className="preview-details mb-4">
-                <p><strong>Duration:</strong> {formData.duration}</p>
-                <p><strong>Roles:</strong> {formData.rolesCount}</p>
-                <p><strong>Start Date:</strong> {formData.startDate}</p>
-                <p><strong>Contact:</strong> {formData.teamContact}</p>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <div className="card mb-6">
+                <h2 className="text-xl font-semibold mb-4">Job Description</h2>
+                <div className="prose text-neutral-700 leading-relaxed">
+                  {formData.description.split('\n').map((line, i) => (
+                    <p key={i} className="mb-3">{line}</p>
+                  ))}
+                </div>
               </div>
-              <div className="preview-skills mb-4">
-                <strong>Required Skills:</strong>
-                <div className="skills-preview">
-                  {formData.skills.map((skill) => (
-                    <span key={skill} className="skill-chip">{skill}</span>
+
+              <div className="card">
+                <h2 className="text-xl font-semibold mb-6">Role Requirements</h2>
+                <div className="space-y-6">
+                  {formData.roles.map((role, index) => (
+                    <div key={index} className="role-card">
+                      <h3 className="font-semibold text-lg mb-3 text-primary-700">
+                        {role.name || `Role ${index + 1}`}
+                      </h3>
+                      <div className="requirements-text text-left">
+                        {role.requirements.split('\n').map((line, i) => (
+                          <p key={i} className="mb-2">{line}</p>
+                        ))}
+                      </div>
+                      
+                      {role.skills && role.skills.length > 0 && (
+                        <div className="skills-section mt-4">
+                          <h4 className="font-medium text-sm text-neutral-600 mb-2">Required Skills:</h4>
+                          <div className="skills-grid">
+                            {role.skills.map(skill => (
+                              <span key={skill} className="skill-chip skill-required">
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>
             </div>
-            <div className="preview-actions flex gap-4">
+
+            <div className="lg:col-span-1">
+              <div className="card mb-6">
+                <h3 className="font-semibold mb-4">Job Details</h3>
+                <div className="space-y-4">
+                  <div className="detail-row">
+                    <span className="detail-label">Duration</span>
+                    <span className="detail-value">{formData.duration}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Positions</span>
+                    <span className="detail-value">{formData.rolesCount}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Start Date</span>
+                    <span className="detail-value">{formData.startDate}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card mb-6">
+                <h3 className="font-semibold mb-4">Contact Information</h3>
+                <div className="contact-card">
+                  <div className="contact-avatar">
+                    {formData.teamContact.split(' ').map(n => n[0]).join('')}
+                  </div>
+                  <div>
+                    <p className="font-medium">{formData.teamContact}</p>
+                    <p className="text-sm text-neutral-500">{formData.contactEmail}</p>
+                  </div>
+                </div>
+              </div>
+
+              {attachments.length > 0 && (
+                <div className="card">
+                  <h3 className="font-semibold mb-4">Attached Files</h3>
+                  <div className="attached-files-list">
+                    {attachments.map((file, index) => (
+                      <div key={index} className="attached-file-item flex items-center gap-3 p-3 bg-neutral-50 rounded-md mb-2">
+                        <Upload size={16} className="text-neutral-400" />
+                        <div className="flex-1">
+                          <span className="text-sm font-medium block">{file.name}</span>
+                          <span className="text-xs text-neutral-400">({(file.size / 1024).toFixed(1)} KB)</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+
+
+          <div className="preview-actions mt-8 flex justify-center gap-4">
+            <button 
+              className="btn btn-secondary"
+              onClick={() => setCurrentStep(1)}
+            >
+              ← Back to Edit
+            </button>
+            <button 
+              className="btn btn-primary btn-lg"
+              onClick={handlePublish}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Publishing...' : 'Publish Job'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="modal-overlay">
+          <div className="success-modal">
+            <div className="success-icon">✅</div>
+            <h2>Job Posted Successfully!</h2>
+            <p>Your job posting has been published and is now live.</p>
+            <div className="modal-actions">
               <button 
                 className="btn btn-secondary"
-                onClick={() => setCurrentStep(1)}
+                onClick={resetForm}
               >
-                Back to Edit
+                Add Another Job
               </button>
               <button 
                 className="btn btn-primary"
-                onClick={handlePublish}
+                onClick={() => {
+                  setShowSuccessModal(false)
+                  navigate('/staffer/talent-matching')
+                }}
               >
-                Publish Job
+                Find Talent Match
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Error Toast */}
+      {error && (
+        <div className="error-toast">
+          <div className="error-content">
+            <span className="error-text">{error}</span>
+            <button 
+              className="error-close"
+              onClick={() => setError('')}
+            >
+              ×
+            </button>
           </div>
         </div>
       )}

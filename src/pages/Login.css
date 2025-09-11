@@ -1,6 +1,6 @@
 .login-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
+  background: url('/dash.png') center/cover, linear-gradient(135deg, var(--primary-600), var(--primary-700));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -22,11 +22,11 @@
 
 .login-container {
   width: 100%;
-  max-width: 480px;
+  max-width: 520px;
   background: white;
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-xl);
-  padding: var(--spacing-2xl);
+  padding: 2rem;
   position: relative;
   z-index: 1;
   border: 1px solid var(--neutral-200);
@@ -34,7 +34,7 @@
 
 .login-header {
   text-align: center;
-  margin-bottom: var(--spacing-2xl);
+  margin-bottom: 1.5rem;
 }
 
 .login-header h1 {
@@ -51,7 +51,7 @@
 }
 
 .role-selection {
-  margin-bottom: var(--spacing-2xl);
+  margin-bottom: 1.5rem;
 }
 
 .role-selection h2 {
@@ -93,6 +93,11 @@
   box-shadow: var(--shadow-lg);
 }
 
+.role-card.selected h3,
+.role-card.selected p {
+  color: white;
+}
+
 .role-card svg {
   margin-bottom: var(--spacing-md);
   color: var(--primary-600);
@@ -116,7 +121,7 @@
 }
 
 .login-form {
-  margin-bottom: var(--spacing-2xl);
+  margin-bottom: 1.5rem;
   animation: fadeIn 0.3s ease-in;
 }
 
@@ -178,7 +183,7 @@
 
 .demo-credentials {
   border-top: 1px solid var(--neutral-200);
-  padding-top: var(--spacing-xl);
+  padding-top: 1rem;
 }
 
 .demo-credentials h3 {
@@ -230,6 +235,73 @@
   width: 100%;
 }
 
+/* Error Toast */
+.error-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  animation: slideIn 0.3s ease-out;
+}
+
+.error-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  border: 1px solid var(--error);
+  border-left: 4px solid var(--error);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 300px;
+  max-width: 400px;
+}
+
+.error-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.error-text {
+  color: var(--error);
+  font-size: 14px;
+  font-weight: 500;
+  flex: 1;
+}
+
+.error-close {
+  background: none;
+  border: none;
+  color: var(--neutral-400);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.error-close:hover {
+  background: var(--neutral-100);
+  color: var(--neutral-600);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
 /* Responsive Design */
 @media (max-width: 640px) {
   .login-page {
@@ -240,12 +312,21 @@
     padding: var(--spacing-xl);
   }
   
-  .role-cards,
-  .demo-users {
+  .role-cards {
     grid-template-columns: 1fr;
   }
   
   .role-card {
     padding: var(--spacing-lg);
+  }
+  
+  .error-toast {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+  }
+  
+  .error-content {
+    min-width: auto;
   }
 }

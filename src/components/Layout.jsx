@@ -14,7 +14,7 @@ const Layout = ({ children, userType, setIsAuthenticated }) => {
 
   const employeeNav = [
     { path: '/employee/dashboard', icon: Home, label: 'Dashboard' },
-    { path: '/employee/jobs', icon: Briefcase, label: 'Jobs' },
+    { path: '/employee/jobs', icon: Briefcase, label: 'Recommended Jobs' },
     { path: '/employee/applications', icon: FileText, label: 'Applications' },
     { path: '/employee/profile', icon: User, label: 'Profile' }
   ]
@@ -22,6 +22,7 @@ const Layout = ({ children, userType, setIsAuthenticated }) => {
   const stafferNav = [
     { path: '/staffer/jobs', icon: Briefcase, label: 'Job Management' },
     { path: '/staffer/post-job', icon: Plus, label: 'Post Job' },
+    { path: '/staffer/talent-matching', icon: Users, label: 'Talent Matching' },
     { path: '/staffer/analytics', icon: BarChart3, label: 'Analytics' }
   ]
 
@@ -41,7 +42,7 @@ const Layout = ({ children, userType, setIsAuthenticated }) => {
           </button>
           {!sidebarCollapsed && (
             <div className="sidebar-title">
-              <h2>AI Staffing Hub</h2>
+              <h2>SmartStaff</h2>
               <p className="user-portal-title">{userTitle}</p>
             </div>
           )}
@@ -64,22 +65,8 @@ const Layout = ({ children, userType, setIsAuthenticated }) => {
 
       <div className="main-content">
         <header className="top-bar">
-          <div className="search-bar">
-            <Search size={20} />
-            <input type="text" placeholder="Search jobs, people, skills..." />
-          </div>
-          
+          <div></div>
           <div className="top-bar-actions">
-            <button className="icon-btn">
-              <Bell size={20} />
-            </button>
-            <button 
-              className="talk-to-ruth-btn"
-              onClick={() => setShowChat(true)}
-            >
-              <MessageCircle size={16} />
-              Talk to Ruth
-            </button>
             <div className="user-menu">
               <div className="user-avatar">
                 <User size={20} />
@@ -103,7 +90,7 @@ const Layout = ({ children, userType, setIsAuthenticated }) => {
       <RuthChat isOpen={showChat} onClose={() => setShowChat(false)} />
     </div>
     
-    {!showChat && (
+    {!showChat && userType === 'employee' && (
       <button 
         className="ruth-chat"
         onClick={() => setShowChat(true)}

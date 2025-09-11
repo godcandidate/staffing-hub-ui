@@ -1,0 +1,43 @@
+const API_BASE_URL = 'http://localhost:8089/api/v1'
+
+export const authAPI = {
+  login: async (email, password) => {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email,
+        password
+      })
+    })
+    
+    const data = await response.json()
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'Login failed')
+    }
+    
+    return data
+  },
+
+  logout: () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+  },
+
+  getStoredUser: () => {
+    const user = localStorage.getItem('user')
+    return user ? JSON.parse(user) : null
+  },
+
+  getStoredToken: () => {
+    return localStorage.getItem('token')
+  },
+
+  storeAuthData: (token, user) => {
+    localStorage.setItem('token', token)
+    localStorage.setItem('user', JSON.stringify(user))
+  }
+}

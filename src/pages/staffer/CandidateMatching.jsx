@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { X, Send, Star } from 'lucide-react'
+import { X, Send, Star, Eye } from 'lucide-react'
 
 const CandidateMatching = () => {
   const { jobId } = useParams()
   const [selectedCandidates, setSelectedCandidates] = useState([])
+  const [showEmployeeModal, setShowEmployeeModal] = useState(null)
+  const [activeTab, setActiveTab] = useState('ai')
 
   const job = {
     title: "Senior Data Analyst",
@@ -21,7 +23,8 @@ const CandidateMatching = () => {
       matchPercent: 92,
       skills: ["Python", "SQL", "Power BI", "Statistics"],
       experience: "3.5 years",
-      avatar: "AT"
+      avatar: "AT",
+      role: "Software Engineer"
     },
     {
       id: 2,
@@ -31,7 +34,8 @@ const CandidateMatching = () => {
       matchPercent: 89,
       skills: ["Python", "R", "Machine Learning", "SQL"],
       experience: "4.2 years",
-      avatar: "MG"
+      avatar: "MG",
+      role: "Data Scientist"
     },
     {
       id: 3,
@@ -41,7 +45,8 @@ const CandidateMatching = () => {
       matchPercent: 85,
       skills: ["SQL", "Tableau", "Excel", "Statistics"],
       experience: "2.8 years",
-      avatar: "DC"
+      avatar: "DC",
+      role: "Business Analyst"
     }
   ]
 
@@ -53,7 +58,9 @@ const CandidateMatching = () => {
       department: "Marketing",
       appliedDate: "Dec 20, 2023",
       status: "pending",
-      avatar: "SW"
+      avatar: "SW",
+      role: "Marketing Analyst",
+      experience: "2.5 years"
     },
     {
       id: 5,
@@ -62,7 +69,9 @@ const CandidateMatching = () => {
       department: "Finance",
       appliedDate: "Dec 18, 2023",
       status: "pending",
-      avatar: "JR"
+      avatar: "JR",
+      role: "Financial Analyst",
+      experience: "3.1 years"
     }
   ]
 
@@ -87,6 +96,16 @@ const CandidateMatching = () => {
     alert(`Sending message to ${selectedCandidates.length} candidates`)
   }
 
+  const selectAll = () => {
+    const currentList = activeTab === 'ai' ? aiRecommendations : applicants
+    const allIds = currentList.map(item => item.id)
+    setSelectedCandidates(allIds)
+  }
+
+  const deselectAll = () => {
+    setSelectedCandidates([])
+  }
+
   return (
     <div className="candidate-matching">
       {/* Job Header */}
@@ -107,108 +126,174 @@ const CandidateMatching = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* AI Recommendations */}
-        <div className="recommendations-section">
-          <h2 className="mb-4">AI Recommendations</h2>
-          
-          <div className="candidates-list">
-            {aiRecommendations.map((candidate) => (
-              <div key={candidate.id} className="candidate-card card mb-4">
-                <div className="candidate-header">
-                  <div className="flex items-start gap-3">
-                    <input
-                      type="checkbox"
-                      checked={selectedCandidates.includes(candidate.id)}
-                      onChange={() => toggleCandidateSelection(candidate.id)}
-                      className="candidate-checkbox"
-                    />
-                    <div className="candidate-avatar">
-                      {candidate.avatar}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <h3 className="font-semibold">{candidate.name}</h3>
-                        <button
-                          onClick={() => removeRecommendation(candidate.id)}
-                          className="remove-btn"
-                          title="Remove from recommendations"
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
-                      <p className="text-sm text-gray mb-2">
-                        {candidate.role} • {candidate.department}
-                      </p>
-                      <div className="match-info mb-3">
-                        <span className="match-percent">
-                          <Star size={16} className="text-accent-amber" />
-                          {candidate.matchPercent}% match
-                        </span>
-                        <span className="text-sm text-gray">
-                          {candidate.experience} experience
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+      {/* Tabs */}
+      <div className="tabs-container mb-6">
+        <div className="tabs">
+          <button
+            className={`tab ${activeTab === 'ai' ? 'active' : ''}`}
+            onClick={() => setActiveTab('ai')}
+          >
+            AI Recommendations ({aiRecommendations.length})
+          </button>
+          <button
+            className={`tab ${activeTab === 'applicants' ? 'active' : ''}`}
+            onClick={() => setActiveTab('applicants')}
+          >
+            Direct Applicants ({applicants.length})
+          </button>
+        </div>
+      </div>
 
-                <div className="candidate-skills">
-                  {candidate.skills.map((skill) => (
-                    <span key={skill} className="skill-chip">
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
+      {/* Selection Controls */}
+      <div className="selection-controls mb-4 flex items-center gap-4">
+        <button 
+          className="btn btn-ghost btn-sm"
+          onClick={selectedCandidates.length > 0 ? deselectAll : selectAll}
+        >
+          {selectedCandidates.length > 0 ? 'Deselect All' : 'Select All'}
+        </button>
+        <span className="text-sm text-neutral-500">
+          {selectedCandidates.length} selected
+        </span>
+      </div>
+
+      {/* Table */}
+      <div className="candidates-table card">
+        <div className="table-header">
+          <div className="table-row font-semibold text-neutral-600 border-b border-neutral-200 pb-3">
+            <div>#</div>
+            <div>Select</div>
+            <div>Name</div>
+            <div>Role</div>
+            <div>Experience</div>
+            <div>{activeTab === 'ai' ? 'Match %' : ''}</div>
+            <div>Actions</div>
           </div>
         </div>
-
-        {/* Applicants */}
-        <div className="applicants-section">
-          <h2 className="mb-4">Direct Applicants</h2>
-          
-          <div className="applicants-list">
-            {applicants.map((applicant) => (
-              <div key={applicant.id} className="applicant-card card mb-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="candidate-avatar">
-                      {applicant.avatar}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">{applicant.name}</h3>
-                      <p className="text-sm text-gray">
-                        {applicant.role} • {applicant.department}
-                      </p>
-                      <p className="text-xs text-gray">
-                        Applied {applicant.appliedDate}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="applicant-actions">
+        
+        <div className="table-body">
+          {(activeTab === 'ai' ? aiRecommendations : applicants).map((person, index) => (
+            <div key={person.id} className="table-row py-4 border-b border-neutral-100 hover:bg-neutral-50 transition-colors">
+              <div>
+                <span className="text-neutral-400 font-mono text-sm">{index + 1}</span>
+              </div>
+              <div>
+                <input
+                  type="checkbox"
+                  checked={selectedCandidates.includes(person.id)}
+                  onChange={() => toggleCandidateSelection(person.id)}
+                  className="candidate-checkbox"
+                />
+              </div>
+              <div>
+                <span className="font-semibold text-neutral-900 text-sm">{person.name}</span>
+              </div>
+              <div>
+                <span className="text-neutral-600">{person.role}</span>
+              </div>
+              <div>
+                <span className="text-neutral-600">{person.experience}</span>
+              </div>
+              {activeTab === 'ai' ? (
+                <div>
+                  <span className="badge badge-recommended">
+                    {person.matchPercent}%
+                  </span>
+                </div>
+              ) : (
+                <div></div>
+              )}
+              <div className="flex items-center gap-2">
+                <button
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => setShowEmployeeModal(person)}
+                >
+                  <Eye size={16} />
+                  View
+                </button>
+                {activeTab === 'ai' ? (
+                  <button
+                    onClick={() => removeRecommendation(person.id)}
+                    className="btn btn-ghost btn-sm text-error"
+                  >
+                    <X size={16} />
+                    Remove
+                  </button>
+                ) : (
+                  <>
                     <button className="btn btn-success btn-sm">
                       Accept
                     </button>
                     <button className="btn btn-danger btn-sm">
                       Reject
                     </button>
-                  </div>
-                </div>
+                  </>
+                )}
               </div>
-            ))}
-
-            {applicants.length === 0 && (
-              <div className="empty-state text-center p-6">
-                <div className="text-4xl mb-2">📝</div>
-                <p className="text-gray">No direct applications yet</p>
-              </div>
-            )}
-          </div>
+            </div>
+          ))}
         </div>
       </div>
+
+      {/* Employee Details Modal */}
+      {showEmployeeModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal-header">
+              <h3>Employee Details</h3>
+              <button onClick={() => setShowEmployeeModal(null)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-content">
+              <div className="employee-profile">
+                <div className="profile-header mb-4">
+                  <div className="employee-avatar-large">
+                    {showEmployeeModal.name.split(' ').map(n => n[0]).join('')}
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">{showEmployeeModal.name}</h4>
+                    <p className="text-neutral-500">{showEmployeeModal.role}</p>
+                    <p className="text-sm text-neutral-400">{showEmployeeModal.department}</p>
+                  </div>
+                </div>
+                <div className="profile-details">
+                  {showEmployeeModal.experience && (
+                    <div className="detail-section mb-4">
+                      <h5 className="font-medium mb-2">Experience</h5>
+                      <p>{showEmployeeModal.experience}</p>
+                    </div>
+                  )}
+                  {showEmployeeModal.skills && (
+                    <div className="detail-section mb-4">
+                      <h5 className="font-medium mb-2">Skills</h5>
+                      <div className="skills-grid">
+                        {showEmployeeModal.skills.map((skill) => (
+                          <span key={skill} className="skill-chip">{skill}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {showEmployeeModal.matchPercent && (
+                    <div className="detail-section">
+                      <h5 className="font-medium mb-2">Match Score</h5>
+                      <span className="text-success font-semibold text-lg">{showEmployeeModal.matchPercent}%</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button 
+                className="btn btn-primary"
+                onClick={() => setShowEmployeeModal(null)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
