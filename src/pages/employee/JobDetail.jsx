@@ -164,19 +164,25 @@ const JobDetail = () => {
         <div className="lg:col-span-1">
 
 
-          <div className="card mb-6">
-            <h3 className="mb-4">Team Contact</h3>
-            <div className="contact-info">
-              <div className="contact-avatar mb-3">
-                <div className="avatar-circle">
-                  {job.teamContact.split(' ').map(n => n[0]).join('')}
+          <div className="card mb-6 team-contact-enhanced">
+            <h3 className="mb-4 text-lg font-semibold">Team Contact</h3>
+            <div className="team-contact-refined">
+              <div className="contact-profile">
+                <div className="team-avatar">
+                  <div className="avatar-gradient">
+                    <span className="avatar-initials">
+                      {job.teamContact.split(' ').map(n => n[0]).join('')}
+                    </span>
+                    <div className="avatar-status-indicator"></div>
+                  </div>
                 </div>
-                <div>
-                  <div className="font-medium">{job.teamContact}</div>
-                  <div className="text-sm text-gray">Team Contact</div>
+                <div className="contact-info">
+                  <div className="contact-name">{job.teamContact}</div>
+                  <div className="contact-role">Team Lead</div>
                 </div>
               </div>
-              <a href={`mailto:${job.contactEmail}`} className="btn btn-secondary w-full">
+              <a href={`mailto:${job.contactEmail}`} className="btn btn-contact btn-secondary">
+                <MessageCircle size={16} />
                 Contact Team
               </a>
             </div>
