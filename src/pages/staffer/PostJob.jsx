@@ -1,12 +1,14 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Sparkles, Upload, X, List } from 'lucide-react'
 import { jobsAPI } from '../../api/jobs'
 
 const PostJob = () => {
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    roles: [{ name: '', requirements: '' }],
+    roles: [{ name: '', requirements: '', skills: [] }],
     startDate: '',
     duration: '',
     rolesCount: 1,
@@ -20,16 +22,18 @@ const PostJob = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [error, setError] = useState('')
 
-  const suggestedSkills = [
-    'JavaScript', 'Python', 'React', 'Node.js', 'AWS', 'Docker', 
-    'TypeScript', 'SQL', 'MongoDB', 'Kubernetes', 'GraphQL', 'Vue.js'
-  ]
+  const popularSkills = {
+    frontend: ['React', 'JavaScript', 'TypeScript', 'Vue.js', 'Angular', 'CSS', 'HTML'],
+    backend: ['Node.js', 'Python', 'Java', 'C#', '.NET', 'PHP', 'Ruby'],
+    devops: ['AWS', 'Docker', 'Kubernetes', 'Jenkins', 'Terraform', 'Azure', 'GCP'],
+    data: ['SQL', 'Python', 'R', 'Tableau', 'Power BI', 'Spark', 'MongoDB']
+  }
 
   const handleInputChange = (field, value) => {
     if (field === 'rolesCount') {
       const count = parseInt(value)
       const newRoles = Array.from({ length: count }, (_, i) => 
-        formData.roles[i] || { name: '', requirements: '' }
+        formData.roles[i] || { name: '', requirements: '', skills: [] }
       )
       setFormData(prev => ({ ...prev, [field]: count, roles: newRoles }))
     } else {
@@ -59,6 +63,19 @@ const PostJob = () => {
       return trimmed.startsWith('•') ? trimmed : `• ${trimmed}`
     }).join('\n')
     updateRoleRequirements(roleIndex, bulletPoints)
+  }
+
+  const toggleSkill = (roleIndex, skill) => {
+    const newRoles = [...formData.roles]
+    const currentSkills = newRoles[roleIndex].skills
+    
+    if (currentSkills.includes(skill)) {
+      newRoles[roleIndex].skills = currentSkills.filter(s => s !== skill)
+    } else if (currentSkills.length < 3) {
+      newRoles[roleIndex].skills = [...currentSkills, skill]
+    }
+    
+    setFormData(prev => ({ ...prev, roles: newRoles }))
   }
 
   const enhanceWithAI = () => {
@@ -103,7 +120,7 @@ What You'll Gain:
     setFormData({
       title: '',
       description: '',
-      roles: [{ name: '', requirements: '' }],
+      roles: [{ name: '', requirements: '', skills: [] }],
       startDate: '',
       duration: '',
       rolesCount: 1,
@@ -234,6 +251,45 @@ Strong knowledge of Django framework
 Experience with REST APIs"
                     />
                   </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Required Skills (Max 3)</label>
+                    <div className="skills-categories mb-3">
+                      {Object.entries(popularSkills).map(([category, skills]) => (
+                        <div key={category} className="skill-category mb-3">
+                          <h4 className="text-sm font-medium text-neutral-600 mb-2 capitalize">{category === 'data' ? 'Data Engineering' : category}</h4>
+                          <div className="skills-grid">
+                            {skills.map(skill => (
+                              <button
+                                key={skill}
+                                type="button"
+                                className={`skill-tag ${
+                                  role.skills.includes(skill) ? 'skill-tag-selected' : 'skill-tag-available'
+                                } ${role.skills.length >= 3 && !role.skills.includes(skill) ? 'skill-tag-disabled' : ''}`}
+                                onClick={() => toggleSkill(roleIndex, skill)}
+                                disabled={role.skills.length >= 3 && !role.skills.includes(skill)}
+                              >
+                                {skill}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {role.skills.length > 0 && (
+                      <div className="selected-skills">
+                        <p className="text-sm text-neutral-600 mb-2">Selected Skills ({role.skills.length}/3):</p>
+                        <div className="skills-grid">
+                          {role.skills.map(skill => (
+                            <span key={skill} className="skill-chip skill-chip-selected">
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -350,6 +406,19 @@ Experience with REST APIs"
                           <p key={i} className="mb-2">{line}</p>
                         ))}
                       </div>
+                      
+                      {role.skills && role.skills.length > 0 && (
+                        <div className="skills-section mt-4">
+                          <h4 className="font-medium text-sm text-neutral-600 mb-2">Required Skills:</h4>
+                          <div className="skills-grid">
+                            {role.skills.map(skill => (
+                              <span key={skill} className="skill-chip skill-required">
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -445,7 +514,7 @@ Experience with REST APIs"
                 className="btn btn-primary"
                 onClick={() => {
                   setShowSuccessModal(false)
-                  window.location.href = '/staffer/talent-matching'
+                  navigate('/staffer/talent-matching')
                 }}
               >
                 Find Talent Match

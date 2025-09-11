@@ -1261,3 +1261,102 @@
 .project-item-simple:last-child {
   border-bottom: none;
 }
+
+/* Success Modal */
+.success-modal {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: var(--shadow-xl);
+}
+
+.success-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.success-modal h2 {
+  color: var(--neutral-900);
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.success-modal p {
+  color: var(--neutral-600);
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+.success-modal .modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.success-modal .modal-actions .btn {
+  flex: 1;
+  max-width: 150px;
+}
+
+/* Skills Selection */
+.skills-categories {
+  border: 1px solid var(--neutral-200);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  background: var(--neutral-50);
+}
+
+.skill-category {
+  margin-bottom: 1rem;
+}
+
+.skill-category:last-child {
+  margin-bottom: 0;
+}
+
+.skill-tag {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--neutral-300);
+  border-radius: var(--radius-md);
+  background: white;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  margin: 0.25rem;
+}
+
+.skill-tag-available:hover {
+  border-color: var(--primary-500);
+  background: var(--primary-50);
+}
+
+.skill-tag-selected {
+  background: var(--primary-600);
+  color: white;
+  border-color: var(--primary-600);
+}
+
+.skill-tag-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.selected-skills {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--primary-50);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--primary-200);
+}
+
+.skill-chip-selected {
+  background: var(--primary-600);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-size: 0.875rem;
+  margin: 0.25rem;
+}
