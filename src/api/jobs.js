@@ -122,6 +122,118 @@ export const jobsAPI = {
     return data
   },
 
+  getEmployeeDashboardStats: async () => {
+    const token = authAPI.getStoredToken()
+    
+    if (!token) {
+      throw new Error('Authentication required')
+    }
+
+    // Get all jobs and applications data for statistics
+    const [jobsResponse, applicationsResponse] = await Promise.allSettled([
+      fetch(`${API_BASE_URL}/staffer/jobs`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }),
+      // For now, we'll calculate applications based on available data
+      // In a real app, this would be a separate endpoint
+      Promise.resolve({ ok: true, json: () => Promise.resolve({ data: [] }) })
+    ])
+
+    const jobs = jobsResponse.status === 'fulfilled' && jobsResponse.value.ok 
+      ? await jobsResponse.value.json() 
+      : { data: [] }
+
+    // Calculate statistics from available data
+    const openJobs = jobs.data.filter(job => job.status === 'OPEN')
+    const user = authAPI.getStoredUser()
+    
+    // Calculate new matching roles based on user skills
+    let newMatchingRoles = 0
+    try {
+      const profileResponse = await fetch(`${API_BASE_URL}/employee/profile`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      if (profileResponse.ok) {
+        const profileData = await profileResponse.json()
+        const employee = profileData.data.employee
+        const userSkills = employee.skills || []
+        
+        // Count jobs that match user skills
+        newMatchingRoles = openJobs.filter(job => {
+          const jobSkills = job.requiredSkills || []
+          return jobSkills.some(skill => 
+            userSkills.some(userSkill => 
+              userSkill.toLowerCase().includes(skill.toLowerCase()) ||
+              skill.toLowerCase().includes(userSkill.toLowerCase())
+            )
+          )
+        }).length
+      }
+    } catch (error) {
+      console.warn('Could not fetch profile for matching roles calculation:', error)
+    }
+    
+    // Get user profile to calculate completeness
+    let profileCompleteness = 0
+    try {
+      const profileResponse = await fetch(`${API_BASE_URL}/employee/profile`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      if (profileResponse.ok) {
+        const profileData = await profileResponse.json()
+        const employee = profileData.data.employee
+        
+        // Calculate profile completeness based on filled fields
+        let completeness = 0
+        const fields = ['department', 'roles', 'experience', 'skills']
+        fields.forEach(field => {
+          if (employee[field] && 
+              (Array.isArray(employee[field]) ? employee[field].length > 0 : true)) {
+            completeness += 25
+          }
+        })
+        profileCompleteness = completeness
+      }
+    } catch (error) {
+      console.warn('Could not fetch profile for completeness calculation:', error)
+    }
+
+    // Get actual pending applications count
+    let pendingApplications = 0
+    try {
+      const applicationsResponse = await fetch(`${API_BASE_URL}/employee/applications`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      if (applicationsResponse.ok) {
+        const applicationsData = await applicationsResponse.json()
+        pendingApplications = applicationsData.data.filter(app => app.status === 'PENDING').length
+      }
+    } catch (error) {
+      console.warn('Could not fetch applications for pending count:', error)
+    }
+
+    return {
+      data: {
+        newMatchingRoles,
+        pendingApplications,
+        profileCompleteness
+      }
+    }
+  },
+
   postJob: async (jobData, attachments = []) => {
     const token = authAPI.getStoredToken()
     
