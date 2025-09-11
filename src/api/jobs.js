@@ -53,6 +53,54 @@ export const jobsAPI = {
     return data
   },
 
+  getEmployeeJobs: async () => {
+    const token = authAPI.getStoredToken()
+    
+    if (!token) {
+      throw new Error('Authentication required')
+    }
+
+    const response = await fetch(`${API_BASE_URL}/staffer/jobs`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch jobs')
+    }
+
+    return data
+  },
+
+  getJobById: async (jobId) => {
+    const token = authAPI.getStoredToken()
+    
+    if (!token) {
+      throw new Error('Authentication required')
+    }
+
+    const response = await fetch(`${API_BASE_URL}/staffer/jobs/${jobId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch job details')
+    }
+
+    return data
+  },
+
   postJob: async (jobData, attachments = []) => {
     const token = authAPI.getStoredToken()
     

@@ -1,16 +1,26 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { 
   Home, Briefcase, FileText, User, BarChart3, 
   Plus, Users, Bell, Search, MessageCircle, Menu, Bot 
 } from 'lucide-react'
-import RuthChat from './RuthChat'
+import KeziaChat from './KeziaChat'
 import './Layout.css'
 
 const Layout = ({ children, userType, setIsAuthenticated }) => {
   const location = useLocation()
   const [showChat, setShowChat] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [ruthChatOpen, setRuthChatOpen] = useState(false)
+
+  useEffect(() => {
+    const handleRuthChatToggle = (event) => {
+      setRuthChatOpen(event.detail.isOpen)
+    }
+
+    window.addEventListener('ruthChatToggle', handleRuthChatToggle)
+    return () => window.removeEventListener('ruthChatToggle', handleRuthChatToggle)
+  }, [])
 
   const employeeNav = [
     { path: '/employee/dashboard', icon: Home, label: 'Dashboard' },
@@ -87,10 +97,10 @@ const Layout = ({ children, userType, setIsAuthenticated }) => {
         </main>
       </div>
 
-      <RuthChat isOpen={showChat} onClose={() => setShowChat(false)} />
+      <KeziaChat isOpen={showChat} onClose={() => setShowChat(false)} />
     </div>
     
-    {!showChat && userType === 'employee' && (
+    {!showChat && userType === 'employee' && !ruthChatOpen && (
       <button 
         className="ruth-chat"
         onClick={() => setShowChat(true)}

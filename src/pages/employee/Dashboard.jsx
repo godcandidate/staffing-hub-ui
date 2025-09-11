@@ -1,8 +1,44 @@
+import { useState, useEffect } from 'react'
 import { MessageCircle, TrendingUp } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { jobsAPI } from '../../api/jobs'
 
 const Dashboard = () => {
-  const allJobs = [
+  const [allJobsData, setAllJobsData] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const jobsPerPage = 4
+
+  useEffect(() => {
+    fetchJobs()
+  }, [])
+
+  const totalPages = Math.ceil(allJobsData.length / jobsPerPage)
+  
+  // Calculate current page jobs
+  const startIndex = (currentPage - 1) * jobsPerPage
+  const endIndex = startIndex + jobsPerPage
+  const currentJobs = allJobsData.slice(startIndex, endIndex)
+
+  const goToPage = (page) => {
+    setCurrentPage(page)
+  }
+
+  const fetchJobs = async () => {
+    try {
+      setIsLoading(true)
+      setError('')
+      const response = await jobsAPI.getEmployeeJobs()
+      setAllJobsData(response.data)
+    } catch (error) {
+      setError(error.message || 'Failed to load jobs')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const mockJobs = [
     {
       id: 1,
       title: "Senior Data Analyst",
@@ -53,7 +89,7 @@ const Dashboard = () => {
     }
   ]
 
-  const recommendedJobs = allJobs.filter(job => job.isRecommended).slice(0, 3)
+  const recommendedJobs = allJobsData.slice(0, 3)
 
   return (
     <div className="dashboard">
@@ -111,45 +147,88 @@ const Dashboard = () => {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {allJobs.map((job) => (
-            <div key={job.id} className="card card-hover">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h3 className="font-semibold text-lg text-neutral-900 mb-1">{job.title}</h3>
-                  <p className="text-sm text-neutral-500">{job.team} • {job.duration}</p>
-                </div>
-                {job.isRecommended ? (
-                  <span className="badge badge-recommended">
-                    {job.matchPercent}% match
-                  </span>
-                ) : (
+        {isLoading ? (
+          <div className="text-center py-8">
+            <div className="text-lg">Loading jobs...</div>
+          </div>
+        ) : error ? (
+          <div className="text-center py-8">
+            <div className="text-error">{error}</div>
+            <button 
+              className="btn btn-secondary mt-4"
+              onClick={fetchJobs}
+            >
+              Retry
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {currentJobs.map((job) => (
+              <div key={job.id} className="card card-hover">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg text-neutral-900 mb-1">{job.role}</h3>
+                    <p className="text-sm text-neutral-500">{job.client} • {job.duration}</p>
+                  </div>
                   <span className="badge badge-secondary">
                     Available
                   </span>
-                )}
-              </div>
+                </div>
 
-              <div className="skills-section mb-6">
-                {job.skills.map((skill) => (
-                  <span key={skill} className="skill-chip">
-                    {skill}
-                  </span>
-                ))}
-              </div>
+                <div className="skills-section mb-6">
+                  {job.requiredSkills.map((skill) => (
+                    <span key={skill} className="skill-chip">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
 
-              <div className="flex items-center justify-between pt-4 border-t border-neutral-100">
-                <span className="text-sm text-neutral-500">Starts {job.startDate}</span>
-                <Link 
-                  to={`/employee/jobs/${job.id}`}
-                  className="btn btn-primary btn-sm"
-                >
-                  View Details
-                </Link>
+                <div className="flex items-center justify-between pt-4 border-t border-neutral-100">
+                  <span className="text-sm text-neutral-500">Starts {job.startDate}</span>
+                  <Link 
+                    to={`/employee/jobs/${job.id}`}
+                    state={{ job }}
+                    className="btn btn-primary btn-sm"
+                  >
+                    View Details
+                  </Link>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
+        
+        {!isLoading && !error && totalPages > 1 && (
+          <div className="pagination mt-6 flex justify-center gap-2">
+            <button 
+              className="btn btn-ghost btn-sm"
+              onClick={() => goToPage(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+            
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+              <button
+                key={page}
+                className={`btn btn-sm ${
+                  currentPage === page ? 'btn-primary' : 'btn-ghost'
+                }`}
+                onClick={() => goToPage(page)}
+              >
+                {page}
+              </button>
+            ))}
+            
+            <button 
+              className="btn btn-ghost btn-sm"
+              onClick={() => goToPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

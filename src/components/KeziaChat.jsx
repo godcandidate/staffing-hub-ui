@@ -1,62 +1,71 @@
 import { useState } from 'react'
 import { X, Send, Bot, Sparkles } from 'lucide-react'
-import './RuthChat.css'
+import { keziaAPI } from '../api/kezia'
+import './KeziaChat.css'
 
-const RuthChat = ({ isOpen, onClose }) => {
+const KeziaChat = ({ isOpen, onClose }) => {
   const [message, setMessage] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
   const [messages, setMessages] = useState([
     {
       id: 1,
-      type: 'ruth',
-      text: "Hi! I'm Ruth, your AI assistant. How can I help you today?",
+      type: 'kezia',
+      text: "Hi! I'm Kezia, your AI assistant. How can I help you today?",
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ])
 
   const quickReplies = [
-    "What skills are needed for the Power BI role?",
-    "Am I qualified for job #104?",
-    "Find me backend roles",
-    "Show me recommended jobs"
+    "How can I keep my skills fresh?",
+    "How often should I update my CV?",
+    "What should I do if I'm between projects?",
+    "How can I stay informed about staffing opportunities?",
+    "How does the Staffing Team ensure fairness?"
   ]
 
-  const handleSend = () => {
-    if (!message.trim()) return
+  const handleSend = async (messageText = message) => {
+    if (!messageText.trim() || isLoading) return
 
-    const newMessage = {
-      id: messages.length + 1,
+    const userMessage = {
+      id: Date.now(),
       type: 'user',
-      text: message,
+      text: messageText,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
 
-    setMessages(prev => [...prev, newMessage])
+    setMessages(prev => [...prev, userMessage])
     setMessage('')
+    setIsLoading(true)
 
-    // Mock AI response
-    setTimeout(() => {
-      const response = {
-        id: messages.length + 2,
-        type: 'ruth',
-        text: generateMockResponse(message),
+    try {
+      const response = await keziaAPI.askQuestion(messageText)
+      
+      const keziaResponse = {
+        id: Date.now() + 1,
+        type: 'kezia',
+        text: response.message || response.answer || 'I received your question and will help you with that.',
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
-      setMessages(prev => [...prev, response])
-    }, 1000)
+      
+      setMessages(prev => [...prev, keziaResponse])
+    } catch (error) {
+      const errorResponse = {
+        id: Date.now() + 1,
+        type: 'kezia',
+        text: 'Sorry, I\'m having trouble connecting right now. Please try again later.',
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }
+      
+      setMessages(prev => [...prev, errorResponse])
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const generateMockResponse = (userMessage) => {
-    const responses = [
-      "Based on your profile, I found 3 roles that match your skills perfectly. Would you like me to show them?",
-      "The Power BI role requires experience with data visualization, SQL, and business intelligence. You have 85% skill match!",
-      "I've found 5 backend positions that align with your Python and Node.js experience. Shall I apply you to the top matches?",
-      "Great question! Let me analyze the job requirements against your profile..."
-    ]
-    return responses[Math.floor(Math.random() * responses.length)]
-  }
+
 
   const handleQuickReply = (reply) => {
-    setMessage(reply)
+    handleSend(reply)
   }
 
   if (!isOpen) return null
@@ -71,7 +80,7 @@ const RuthChat = ({ isOpen, onClose }) => {
               <Sparkles size={12} className="ai-sparkle" />
             </div>
             <div>
-              <h3>Ruth AI Assistant</h3>
+              <h3>Kezia</h3>
               <span className="status">Online</span>
             </div>
           </div>
@@ -89,6 +98,19 @@ const RuthChat = ({ isOpen, onClose }) => {
               <div className="message-time">{msg.time}</div>
             </div>
           ))}
+          
+          {isLoading && (
+            <div className="message kezia">
+              <div className="message-content loading-message">
+                <div className="typing-indicator">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+                <span className="loading-text">Kezia is thinking...</span>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="quick-replies">
@@ -108,10 +130,10 @@ const RuthChat = ({ isOpen, onClose }) => {
             type="text"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="Ask Ruth anything..."
+            placeholder="Ask Kezia anything..."
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
           />
-          <button className="send-btn" onClick={handleSend}>
+          <button className="send-btn" onClick={() => handleSend()} disabled={isLoading}>
             <Send size={16} />
           </button>
         </div>
@@ -120,4 +142,4 @@ const RuthChat = ({ isOpen, onClose }) => {
   )
 }
 
-export default RuthChat
+export default KeziaChat
