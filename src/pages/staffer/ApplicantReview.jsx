@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { User, CheckCircle, XCircle } from 'lucide-react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { User, CheckCircle, XCircle, ArrowLeft } from 'lucide-react'
 
 const ApplicantReview = () => {
   const { jobId } = useParams()
+  const navigate = useNavigate()
   const [selectedApplicant, setSelectedApplicant] = useState(null)
 
   const job = {
@@ -63,8 +64,23 @@ const ApplicantReview = () => {
     setSelectedApplicant(null)
   }
 
+  const handleBackToJobManagement = () => {
+    navigate('/staffer/jobs')
+  }
+
   return (
     <div className="applicant-review">
+      {/* Back Navigation */}
+      <div className="mb-4">
+        <button
+          onClick={handleBackToJobManagement}
+          className="btn btn-outline btn-sm flex items-center gap-2"
+        >
+          <ArrowLeft size={16} />
+          Back to Job Management
+        </button>
+      </div>
+
       {/* Header */}
       <div className="review-header card mb-6">
         <div className="flex items-center justify-between">
