@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Search, Eye, Plus, X, Save } from 'lucide-react'
 import { jobsAPI } from '../../api/jobs'
+import { talentAPI } from '../../api/talent'
 import { CircularProgress, Box } from '@mui/material'
 
 const TalentMatching = () => {
@@ -30,48 +31,32 @@ const TalentMatching = () => {
     }
   }
 
-  const employees = [
-    {
-      id: 1,
-      name: "Alex Thompson",
-      role: "Senior Cloud Architect",
-      department: "Engineering",
-      experience: "5 years",
-      skills: ["Azure", "AWS", "Kubernetes", "Docker"],
-      matchScore: 95,
-      availability: "Available"
-    },
-    {
-      id: 2,
-      name: "Sarah Chen",
-      role: "DevOps Engineer",
-      department: "Infrastructure",
-      experience: "4 years",
-      skills: ["Docker", "Jenkins", "Terraform", "AWS"],
-      matchScore: 88,
-      availability: "Available"
-    },
-    {
-      id: 3,
-      name: "Mike Rodriguez",
-      role: "Security Engineer",
-      department: "Security",
-      experience: "6 years",
-      skills: ["Cybersecurity", "Azure Security", "Compliance"],
-      matchScore: 92,
-      availability: "Partially Available"
-    }
-  ]
 
-  const handleMatchEmployees = (job) => {
+
+  const handleMatchEmployees = async (job) => {
     setSelectedJob(job)
     setIsMatching(true)
     setSelectedEmployees([])
     
-    setTimeout(() => {
+    try {
+      const response = await talentAPI.matchEmployees(job.id)
+      const employees = response.data.map(emp => ({
+        id: emp.user_id,
+        name: emp.name,
+        matchScore: parseInt(emp.match_score.replace('%', '')),
+        role: 'Employee', // Default role since not provided by API
+        department: 'Various', // Default department
+        experience: 'N/A', // Not provided by API
+        skills: [], // Not provided by API
+        availability: 'Available' // Default availability
+      }))
       setMatchedEmployees(employees)
+    } catch (error) {
+      console.error('Failed to match employees:', error)
+      setMatchedEmployees([])
+    } finally {
       setIsMatching(false)
-    }, 5000)
+    }
   }
 
   const toggleEmployeeSelection = (employee) => {
