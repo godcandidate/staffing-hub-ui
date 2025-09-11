@@ -132,6 +132,7 @@
   text-align: center;
 }
 
+/* Legacy avatar styles - keeping for backward compatibility */
 .contact-avatar {
   display: flex;
   align-items: center;
@@ -142,14 +143,291 @@
 .avatar-circle {
   width: 48px;
   height: 48px;
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
   color: white;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
+  box-shadow: 0 2px 8px rgba(221, 89, 40, 0.2);
+  transition: all 0.2s ease;
+}
+
+.avatar-circle:hover {
+  box-shadow: 0 4px 12px rgba(221, 89, 40, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Enhanced Team Avatar Styles - Updated */
+.team-avatar {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.avatar-gradient {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 50%, var(--primary-700) 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(221, 89, 40, 0.2);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  border: 3px solid white;
+}
+
+.avatar-gradient:hover {
+  box-shadow: 0 6px 20px rgba(221, 89, 40, 0.3);
+  transform: translateY(-2px) scale(1.05);
+}
+
+.avatar-initials {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.5px;
+}
+
+.avatar-status-indicator {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  background: var(--success);
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  animation: statusPulse 3s infinite;
+}
+
+/* Enhanced Team Contact Card */
+.team-contact-enhanced {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid var(--neutral-200);
+  position: relative;
+  overflow: hidden;
+}
+
+.team-contact-enhanced::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary-500), var(--primary-600), var(--primary-500));
+}
+
+/* Refined Team Contact Styles */
+.team-contact-refined {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.contact-profile {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.contact-info {
+  flex: 1;
+}
+
+.contact-name {
+  font-weight: 600;
+  color: var(--neutral-800);
+  margin-bottom: 0.25rem;
+  font-size: 1rem;
+}
+
+.contact-role {
+  color: var(--neutral-600);
   font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.contact-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--success);
+  font-weight: 500;
+  background: var(--success-bg);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-full);
+  width: fit-content;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+.btn-contact {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  border: 1px solid var(--neutral-300);
+  background: white;
+  color: var(--neutral-700);
+}
+
+.btn-contact:hover {
+  background: var(--primary-50);
+  border-color: var(--primary-300);
+  color: var(--primary-700);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(221, 89, 40, 0.15);
+}
+
+/* Enhanced Team Avatar Styles */
+.team-avatar {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.avatar-gradient {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 50%, var(--primary-700) 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(221, 89, 40, 0.2);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  border: 3px solid white;
+}
+
+.avatar-gradient:hover {
+  box-shadow: 0 6px 20px rgba(221, 89, 40, 0.3);
+  transform: translateY(-2px) scale(1.05);
+}
+
+.avatar-initials {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.5px;
+}
+
+.avatar-status-indicator {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  background: var(--success);
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  animation: statusPulse 3s infinite;
+}
+
+@keyframes statusPulse {
+  0%, 100% {
+    background: var(--success);
+  }
+  50% {
+    background: var(--success-light);
+  }
+}
+
+
+
+/* Loading and Error States */
+.loading-container, .error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-light);
+  border-top: 3px solid var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-message {
+  color: #dc2626;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.skill-preferred {
+  background: var(--background-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-light);
+}
+
+.badge-closed {
+  background: #dc2626;
+  color: white;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+}
+
+.btn-disabled {
+  background: var(--background-secondary);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn-disabled:hover {
+  background: var(--background-secondary);
+  transform: none;
+}
+
+.skill-more {
+  background: var(--background-secondary);
+  color: var(--text-secondary);
+  font-style: italic;
 }
 
 .attachments-list {

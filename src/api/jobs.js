@@ -1,6 +1,7 @@
 import { authAPI } from './auth'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8089/api/v1'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8089/api/v1';
+const RECOMMENDED_JOB_POSTINGS_URL = import.meta.env.VITE_RECOMMENDED_JOB_POSTINGS_URL || 'http://44.248.50.194:6060/api/ai/chatbot/recommend_job_postings';
 
 export const jobsAPI = {
   getOpenJobs: async () => {
@@ -99,6 +100,137 @@ export const jobsAPI = {
     }
 
     return data
+  },
+
+  getRecommendedJobs: async () => {
+    const user = authAPI.getStoredUser()
+    
+    if (!user || !user.id) {
+      throw new Error('User not found. Please log in again.')
+    }
+
+    const response = await fetch(`${RECOMMENDED_JOB_POSTINGS_URL}/${user.id}`, {
+      method: 'GET',
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch recommended jobs')
+    }
+
+    return data
+  },
+
+  getEmployeeDashboardStats: async () => {
+    const token = authAPI.getStoredToken()
+    
+    if (!token) {
+      throw new Error('Authentication required')
+    }
+
+    // Get all jobs and applications data for statistics
+    const [jobsResponse, applicationsResponse] = await Promise.allSettled([
+      fetch(`${API_BASE_URL}/staffer/jobs`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }),
+      // For now, we'll calculate applications based on available data
+      // In a real app, this would be a separate endpoint
+      Promise.resolve({ ok: true, json: () => Promise.resolve({ data: [] }) })
+    ])
+
+    const jobs = jobsResponse.status === 'fulfilled' && jobsResponse.value.ok 
+      ? await jobsResponse.value.json() 
+      : { data: [] }
+
+    // Calculate statistics from available data
+    const openJobs = jobs.data.filter(job => job.status === 'OPEN')
+    
+    // Calculate new matching roles based on user skills
+    let newMatchingRoles = 0
+    try {
+      const profileResponse = await fetch(`${API_BASE_URL}/employee/profile`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      if (profileResponse.ok) {
+        const profileData = await profileResponse.json()
+        const employee = profileData.data.employee
+        const userSkills = employee.skills || []
+        
+        // Count jobs that match user skills
+        newMatchingRoles = openJobs.filter(job => {
+          const jobSkills = job.requiredSkills || []
+          return jobSkills.some(skill => 
+            userSkills.some(userSkill => 
+              userSkill.toLowerCase().includes(skill.toLowerCase()) ||
+              skill.toLowerCase().includes(userSkill.toLowerCase())
+            )
+          )
+        }).length
+      }
+    } catch (error) {
+      console.warn('Could not fetch profile for matching roles calculation:', error)
+    }
+    
+    // Get user profile to calculate completeness
+    let profileCompleteness = 0
+    try {
+      const profileResponse = await fetch(`${API_BASE_URL}/employee/profile`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      if (profileResponse.ok) {
+        const profileData = await profileResponse.json()
+        const employee = profileData.data.employee
+        
+        // Calculate profile completeness based on filled fields
+        let completeness = 0
+        const fields = ['department', 'roles', 'experience', 'skills']
+        fields.forEach(field => {
+          if (employee[field] && 
+              (Array.isArray(employee[field]) ? employee[field].length > 0 : true)) {
+            completeness += 25
+          }
+        })
+        profileCompleteness = completeness
+      }
+    } catch (error) {
+      console.warn('Could not fetch profile for completeness calculation:', error)
+    }
+
+    // Get actual applications count
+    let applications = 0
+    try {
+      const applicationsResponse = await fetch(`${API_BASE_URL}/employee/applications`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      if (applicationsResponse.ok) {
+        const applicationsData = await applicationsResponse.json()
+        applications = applicationsData.data.length
+      }
+    } catch (error) {
+      console.warn('Could not fetch applications for count:', error)
+    }
+
+    return {
+      data: {
+        newMatchingRoles,
+        applications,
+        profileCompleteness
+      }
+    }
   },
 
   postJob: async (jobData, attachments = []) => {

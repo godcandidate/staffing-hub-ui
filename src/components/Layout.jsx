@@ -4,6 +4,7 @@ import {
   Home, Briefcase, FileText, User, BarChart3, 
   Plus, Users, Bell, Search, MessageCircle, Menu, Bot 
 } from 'lucide-react'
+import { authAPI } from '../api/auth'
 import KeziaChat from './KeziaChat'
 import './Layout.css'
 
@@ -38,6 +39,17 @@ const Layout = ({ children, userType, setIsAuthenticated }) => {
 
   const currentNav = userType === 'employee' ? employeeNav : stafferNav
   const userTitle = userType === 'employee' ? 'Employee Portal' : 'Staffer Portal'
+
+  const handleLogout = () => {
+    // Clear all auth data
+    authAPI.clearAuthData()
+    
+    // Reset authentication state
+    setIsAuthenticated(false)
+    
+    // Force reload to clear any cached data
+    window.location.href = '/'
+  }
 
   return (
     <>
@@ -83,7 +95,7 @@ const Layout = ({ children, userType, setIsAuthenticated }) => {
               </div>
               <button 
                 className="logout-btn"
-                onClick={() => setIsAuthenticated(false)}
+                onClick={handleLogout}
                 title="Logout"
               >
                 Logout

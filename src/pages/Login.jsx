@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { User, Lock, Users, Briefcase, Mail } from 'lucide-react'
 import { authAPI } from '../api/auth'
 import './Login.css'
@@ -10,7 +9,6 @@ const Login = ({ setUserType, setIsAuthenticated }) => {
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const navigate = useNavigate()
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -46,12 +44,7 @@ const Login = ({ setUserType, setIsAuthenticated }) => {
         setUserType(selectedRole)
         setIsAuthenticated(true)
         
-        // Redirect to appropriate dashboard
-        if (selectedRole === 'employee') {
-          navigate('/employee/dashboard')
-        } else {
-          navigate('/staffer/jobs')
-        }
+        // App component will handle the redirect automatically
       }
     } catch (error) {
       setError(error.message || 'Server error. Please try again later.')

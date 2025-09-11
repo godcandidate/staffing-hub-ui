@@ -27,6 +27,12 @@ export const authAPI = {
     localStorage.removeItem('user')
   },
 
+  clearAuthData: () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    sessionStorage.clear() // Clear any session data
+  },
+
   getStoredUser: () => {
     const user = localStorage.getItem('user')
     return user ? JSON.parse(user) : null
