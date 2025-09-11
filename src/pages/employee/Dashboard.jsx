@@ -3,6 +3,7 @@ import { MessageCircle, TrendingUp } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { jobsAPI } from '../../api/jobs'
 import { authAPI } from '../../api/auth'
+import { LoadingSpinner } from '../../components/LoadingSpinner'
 
 const Dashboard = () => {
   const [allJobsData, setAllJobsData] = useState([])
@@ -150,9 +151,7 @@ const Dashboard = () => {
         </div>
 
         {isLoading ? (
-          <div className="text-center py-8">
-            <div className="text-lg">Loading jobs...</div>
-          </div>
+          <LoadingSpinner />
         ) : error ? (
           <div className="text-center py-8">
             <div className="text-error">{error}</div>

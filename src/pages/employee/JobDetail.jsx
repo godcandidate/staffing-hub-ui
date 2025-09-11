@@ -68,8 +68,8 @@ const JobDetail = () => {
       <div className="job-detail">
         <div className="text-center py-8">
           <div className="text-lg">Job not found</div>
-          <Link to="/employee/jobs" className="btn btn-secondary mt-4">
-            Back to Jobs
+          <Link to="/employee/dashboard" className="btn btn-secondary mt-4">
+            Back to Dashboard
           </Link>
         </div>
       </div>
@@ -80,9 +80,9 @@ const JobDetail = () => {
     <div className="job-detail">
       {/* Header */}
       <div className="job-header mb-6">
-        <Link to="/employee/jobs" className="back-link flex items-center gap-2 mb-4">
+        <Link to="/employee/dashboard" className="back-link flex items-center gap-2 mb-4">
           <ArrowLeft size={20} />
-          Back to Jobs
+          Back to Dashboard
         </Link>
 
         <div className="flex items-start justify-between">
