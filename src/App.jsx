@@ -6,7 +6,7 @@ import EmployeeDashboard from './pages/employee/Dashboard'
 import JobsBoard from './pages/employee/JobsBoard'
 import JobDetail from './pages/employee/JobDetail'
 import MyApplications from './pages/employee/MyApplications'
-import ProfileView from './pages/employee/ProfileView'
+import Profile from './pages/employee/Profile'
 import PostJob from './pages/staffer/PostJob'
 import JobManagement from './pages/staffer/JobManagement'
 import TalentMatching from './pages/staffer/TalentMatching'
@@ -52,7 +52,7 @@ function App() {
             <Route path="/employee/jobs" element={<JobsBoard />} />
             <Route path="/employee/jobs/:id" element={<JobDetail />} />
             <Route path="/employee/applications" element={<MyApplications />} />
-            <Route path="/employee/profile" element={<ProfileView />} />
+            <Route path="/employee/profile" element={<Profile />} />
             
             {/* Staffer Routes */}
             <Route path="/staffer/post-job" element={<PostJob />} />
