@@ -23,6 +23,12 @@ const KeziaChat = ({ isOpen, onClose }) => {
     "How does the Staffing Team ensure fairness?"
   ]
 
+  const formatMessage = (text) => {
+    return text
+      .replace(/\n\n+/g, '</p><p><br>') // Multiple newlines become paragraph breaks
+      .replace(/\n/g, '<br>') // Single newlines become line breaks
+  }
+
   const handleSend = async (messageText = message) => {
     if (!messageText.trim() || isLoading) return
 
@@ -39,11 +45,13 @@ const KeziaChat = ({ isOpen, onClose }) => {
 
     try {
       const response = await keziaAPI.askQuestion(messageText)
+      const responseText = response.response || response.message || response.answer || 'I received your question and will help you with that.'
       
       const keziaResponse = {
         id: Date.now() + 1,
         type: 'kezia',
-        text: response.message || response.answer || 'I received your question and will help you with that.',
+        text: responseText,
+        formattedText: `<p>${formatMessage(responseText)}</p>`,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
       
@@ -92,9 +100,16 @@ const KeziaChat = ({ isOpen, onClose }) => {
         <div className="chat-messages">
           {messages.map((msg) => (
             <div key={msg.id} className={`message ${msg.type}`}>
-              <div className="message-content">
-                {msg.text}
-              </div>
+              {msg.formattedText ? (
+                <div 
+                  className="message-content"
+                  dangerouslySetInnerHTML={{ __html: msg.formattedText }}
+                />
+              ) : (
+                <div className="message-content">
+                  {msg.text}
+                </div>
+              )}
               <div className="message-time">{msg.time}</div>
             </div>
           ))}
